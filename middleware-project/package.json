@@ -1,0 +1,17 @@
+{
+  "name": "middleware-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "chart": "^0.1.2",
+    "express": "^5.2.1",
+    "js": "^0.1.0"
+  }
+}

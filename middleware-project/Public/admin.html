@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Middleware Admin</title>
+</head>
+<body>
+        <h1>IPTV Middleware Dashboard</h1>
+
+    <h2>Status</h2>
+    <button onclick="loadStatus()">Refresh</button>
+
+    <pre id="status"></pre>
+
+    <h2>STB connectées</h2>
+
+    <button onclick="loadStb()">Afficher</button>
+
+    <pre id="stb"></pre>
+
+    <script>
+        async function loadStatus() {
+            try {
+                const res = await fetch("/status");
+                if (!res.ok) {
+                    throw new Error(`Erreur: ${res.status} ${res.statusText}`);
+                }
+                const data = await res.json();
+                document.getElementById("status").textContent =
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById("status").textContent = error.message;
+            }
+        }
+
+        async function loadStb() {
+            try {
+                const res = await fetch("/stb/list");
+                if (!res.ok) {
+                    throw new Error(`Erreur: ${res.status} ${res.statusText}`);
+                }
+                const data = await res.json();
+                document.getElementById("stb").textContent =
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById("stb").textContent = error.message;
+            }
+        }
+    </script>
+</body>
+</html>

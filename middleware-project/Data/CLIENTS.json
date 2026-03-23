@@ -1,0 +1,14 @@
+[
+  {
+    "room": "01",
+    "stb_id": "stb-01",
+    "subscriptions": ["TF1", "franceinfo"]
+  },
+  {
+    "room": "02",
+    "stb_id": "stb-02",
+    "subscriptions": ["TF1", "France 2"]
+  }
+]
+
+
