@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPTV Admin — Middleware Hôtellerie</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0e14;--bg2:#13161f;--bg3:#1a1e2a;
+  --border:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.14);
+  --text:#e8eaf2;--muted:#6b7080;
+  --accent:#4f6ef7;--green:#22d3a0;--amber:#f59e0b;--red:#f43f5e;--cyan:#06b6d4;--purple:#7c3aed;
+  --mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(79,110,247,.03)1px,transparent 1px),linear-gradient(90deg,rgba(79,110,247,.03)1px,transparent 1px);
+  background-size:40px 40px}
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-title{font-size:15px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.logo-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.08em}
+.dot-live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,211,160,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(34,211,160,0)}}
+nav{padding:16px 0;flex:1}
+.nav-section{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:12px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(79,110,247,.08)}
+.nav-icon{font-size:15px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted)}
+#sse-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:5px;transition:background .3s}
+#sse-dot.on{background:var(--green)} #sse-dot.err{background:var(--red)}
+/* MAIN */
+.main{margin-left:220px;padding:32px;position:relative;z-index:1}
+.page{display:none} .page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-title{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.page-title span{color:var(--accent)}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:11px;padding:7px 14px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.btn:hover{color:var(--text);border-color:var(--bh)} .btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ac{background:rgba(79,110,247,.15);color:var(--accent);border-color:rgba(79,110,247,.3)} .btn.ac:hover{background:rgba(79,110,247,.25)}
+.btn.rd{background:rgba(244,63,94,.1);color:var(--red);border-color:rgba(244,63,94,.25)} .btn.rd:hover{background:rgba(244,63,94,.2)}
+.btn.am{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.25)} .btn.am:hover{background:rgba(245,158,11,.2)}
+.btn.gr{background:rgba(34,211,160,.1);color:var(--green);border-color:rgba(34,211,160,.25)} .btn.gr:hover{background:rgba(34,211,160,.2)}
+/* STAT CARDS */
+.cards-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--bh)}
+.stat-card::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:.06;transform:translate(20px,-20px)}
+.cg::after{background:var(--green)} .ca::after{background:var(--accent)} .cam::after{background:var(--amber)} .cc::after{background:var(--cyan)} .cp::after{background:var(--purple)}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:5px}
+.sv-g{color:var(--green)} .sv-a{color:var(--accent)} .sv-am{color:var(--amber)} .sv-c{color:var(--cyan)} .sv-p{color:var(--purple)}
+.stat-sub{font-family:var(--mono);font-size:10px;color:var(--muted)}
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-3-1{display:grid;grid-template-columns:1fr 320px;gap:20px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+/* PANEL */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+.panel-title{font-size:13px;font-weight:700;letter-spacing:.02em}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;letter-spacing:.04em}
+.bg{background:rgba(34,211,160,.12);color:var(--green)} .ba{background:rgba(79,110,247,.14);color:var(--accent)} .bam{background:rgba(245,158,11,.12);color:var(--amber)} .br{background:rgba(244,63,94,.12);color:var(--red)} .bc{background:rgba(6,182,212,.12);color:var(--cyan)} .bm{background:rgba(255,255,255,.06);color:var(--muted)} .bp{background:rgba(124,58,237,.12);color:var(--purple)}
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+thead th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{padding:11px 20px;font-size:13px;vertical-align:middle}
+.mono{font-family:var(--mono);font-size:12px}
+/* DOTS */
+.sdot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.g{background:var(--green);box-shadow:0 0 6px rgba(34,211,160,.5);animation:pulse 2s infinite}
+.dot.r{background:var(--red)} .dot.m{background:var(--muted)} .dot.am{background:var(--amber)}
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(79,110,247,.1);color:var(--accent);border-radius:3px;border:1px solid rgba(79,110,247,.2)}
+.tag-pack{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;border:1px solid transparent}
+.tag-mux{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(6,182,212,.1);color:var(--cyan);border-radius:3px;border:1px solid rgba(6,182,212,.2)}
+/* PROGRESS */
+.prog-row{padding:13px 20px;border-bottom:1px solid var(--border)}
+.prog-row:last-child{border-bottom:none}
+.prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.prog-name{font-size:12px;font-weight:600} .prog-count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.prog-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .6s ease}
+/* PACK CARD */
+.pack-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;cursor:pointer}
+.pack-card:hover{border-color:var(--bh)}
+.pack-card.selected{border-color:var(--accent)}
+.pack-header{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.pack-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.pack-name{font-size:14px;font-weight:700;flex:1}
+.pack-desc{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px}
+.pack-body{padding:12px 18px}
+.pack-ch-list{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.pack-ch-item{font-family:var(--mono);font-size:10px;padding:2px 6px;background:rgba(255,255,255,.05);border-radius:3px;color:var(--muted)}
+.pack-footer{display:flex;gap:6px;padding-top:8px;border-top:1px solid var(--border)}
+/* METRICS */
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid var(--border);font-size:13px}
+.mrow:last-child{border-bottom:none}
+.mkey{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mval{font-family:var(--mono);font-size:13px;font-weight:500}
+.mval.g{color:var(--green)} .mval.am{color:var(--amber)} .mval.r{color:var(--red)}
+/* LOG */
+.log-box{font-family:var(--mono);font-size:11px;color:var(--muted);padding:14px 20px;max-height:360px;overflow-y:auto;line-height:1.9}
+.log-box::-webkit-scrollbar{width:4px} .log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.ll{display:flex;gap:10px}
+.lt{color:var(--muted);flex-shrink:0} .lok{color:var(--green)} .lwarn{color:var(--amber)} .lerr{color:var(--red)} .linfo{color:var(--accent)}
+/* DETAIL */
+.drow{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px}
+.drow:last-child{border-bottom:none}
+.dkey{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;flex-shrink:0;width:110px}
+.dval{text-align:right;font-weight:600}
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sinput{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:9px 14px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;transition:border-color .15s}
+.sinput:focus{border-color:var(--accent)} .sinput::placeholder{color:var(--muted)}
+/* CHECKBOX GRID */
+.ch-checkbox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:280px;overflow-y:auto;padding:4px}
+.ch-checkbox-grid::-webkit-scrollbar{width:4px} .ch-checkbox-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.ch-cb-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:5px;border:1px solid var(--border);cursor:pointer;transition:all .1s;font-size:12px;font-weight:600}
+.ch-cb-item:hover{border-color:var(--bh);background:rgba(255,255,255,.03)}
+.ch-cb-item.checked{border-color:rgba(79,110,247,.4);background:rgba(79,110,247,.08);color:var(--accent)}
+.ch-cb-item input{display:none}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bh);border-radius:12px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:28px;animation:slideUp .2s ease}
+.modal::-webkit-scrollbar{width:4px} .modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:20px}
+.fg{margin-bottom:16px}
+.flabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.finput{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;transition:border-color .15s}
+.finput:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+/* WARN BOX */
+.warn-box{background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);border-radius:8px;padding:16px 20px;margin-bottom:20px;font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted)}
+.warn-box strong{color:var(--red)}
+/* NOTIF */
+#notif{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--bh);border-radius:8px;padding:12px 18px;font-family:var(--mono);font-size:12px;color:var(--text);z-index:200;transform:translateY(80px);opacity:0;transition:all .3s}
+#notif.show{transform:translateY(0);opacity:1}
+/* RESTART OVERLAY */
+#roverlay{display:none;position:fixed;inset:0;background:rgba(12,14,20,.9);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:var(--mono);font-size:14px;color:var(--amber)}
+#roverlay.show{display:flex}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{padding:36px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px}
+/* ABONNE EDIT ZONE */
+.edit-section{margin-bottom:20px}
+.edit-section-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.pack-checkbox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pack-cb-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:7px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.pack-cb-item:hover{border-color:var(--bh)}
+.pack-cb-item.checked{border-color:rgba(79,110,247,.4);background:rgba(79,110,247,.07)}
+.pack-cb-item input{display:none}
+.pack-cb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pack-cb-name{font-size:12px;font-weight:700;flex:1}
+.pack-cb-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-title">IPTV Admin</div>
+    <div class="logo-sub"><span id="sse-dot"></span>middleware · port 3000</div>
+  </div>
+  <nav>
+    <div class="nav-section">Navigation</div>
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">◈</span> Dashboard</div>
+    <div class="nav-item" onclick="nav('packs')"><span class="nav-icon">◉</span> Packs</div>
+    <div class="nav-item" onclick="nav('abonnes')"><span class="nav-icon">◎</span> Abonnés</div>
+    <div class="nav-item" onclick="nav('chaines')"><span class="nav-icon">▣</span> Chaînes</div>
+    <div class="nav-item" onclick="nav('stb')"><span class="nav-icon">⬡</span> STB</div>
+    <div class="nav-section">Système</div>
+    <div class="nav-item" onclick="nav('systeme')"><span class="nav-icon">⚙</span> Système</div>
+    <div class="nav-item" onclick="nav('logs')"><span class="nav-icon">≡</span> Journal</div>
+  </nav>
+  <div class="sidebar-footer">v3.0 · Lycée Newton<br><span id="clock">--:--:--</span></div>
+</aside>
+
+<main class="main">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="page-dashboard" class="page active">
+  <div class="topbar">
+    <div class="page-title">Dashboard <span>·</span> Vue d'ensemble</div>
+    <span id="sse-label" class="badge bm">Connexion...</span>
+  </div>
+  <div class="cards-row">
+    <div class="stat-card cg"> <div class="stat-label">Middleware</div><div class="stat-value sv-g"  id="c-mw">—</div><div class="stat-sub" id="c-pid">PID —</div></div>
+    <div class="stat-card ca"> <div class="stat-label">Uptime</div>    <div class="stat-value sv-a"  id="c-up">—</div><div class="stat-sub">depuis démarrage</div></div>
+    <div class="stat-card cam"><div class="stat-label">Chaînes</div>   <div class="stat-value sv-am" id="c-ch">—</div><div class="stat-sub">CHAINES.json</div></div>
+    <div class="stat-card cc"> <div class="stat-label">Abonnés</div>   <div class="stat-value sv-c"  id="c-ab">—</div><div class="stat-sub">CLIENTS.json</div></div>
+    <div class="stat-card cp"> <div class="stat-label">Packs définis</div><div class="stat-value sv-p" id="c-packs">—</div><div class="stat-sub">CHAINES.json</div></div>
+  </div>
+  <div class="grid-3-1">
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Abonnés & packs</div><span class="badge ba" id="d-ab-cnt">0</span></div>
+      <div class="panel-body"><table>
+        <thead><tr><th>STB ID</th><th>Chambre</th><th>Packs souscrits</th><th>À-la-carte</th><th>Total chaînes</th></tr></thead>
+        <tbody id="d-ab-body"><tr><td colspan="5" class="empty">Connexion SSE...</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Packs disponibles</div><span class="badge bc" id="d-pack-cnt">—</span></div>
+      <div id="d-pack-bars"><div class="empty">Connexion SSE...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PACKS ═══ -->
+<div id="page-packs" class="page">
+  <div class="topbar">
+    <div class="page-title">Packs <span>·</span> Gestion</div>
+    <button class="btn ac" onclick="openPackModal()">+ Créer un pack</button>
+  </div>
+  <div class="grid-3" id="packs-grid"><div class="empty" style="grid-column:1/-1">Connexion SSE...</div></div>
+</div>
+
+<!-- ═══ ABONNÉS ═══ -->
+<div id="page-abonnes" class="page">
+  <div class="topbar">
+    <div class="page-title">Abonnés <span>·</span> Gestion</div>
+    <button class="btn ac" onclick="openAddModal()">+ Ajouter</button>
+  </div>
+  <div class="search-bar"><input class="sinput" type="text" placeholder="Rechercher par chambre ou STB ID..." oninput="filterAb(this.value)"></div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Liste des abonnés</div><span class="badge bam" id="ab-cnt">0</span></div>
+      <div class="panel-body"><table>
+        <thead><tr><th>STB ID</th><th>Chambre</th><th>Packs</th><th>À-la-carte</th><th>Action</th></tr></thead>
+        <tbody id="ab-body"><tr><td colspan="5" class="empty">Connexion SSE...</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Modifier abonné</div></div>
+      <div id="ab-edit"><div class="empty">Cliquez sur un abonné</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHAÎNES ═══ -->
+<div id="page-chaines" class="page">
+  <div class="topbar"><div class="page-title">Chaînes <span>·</span> Catalogue</div></div>
+  <div class="search-bar">
+    <input class="sinput" type="text" placeholder="Rechercher une chaîne..." oninput="filterCh(this.value)">
+    <select class="sinput" style="flex:0;width:180px" onchange="filterPack(this.value)" id="pack-sel"><option value="">Tous les packs</option></select>
+    <select class="sinput" style="flex:0;width:140px" onchange="filterMux(this.value)" id="mux-sel"><option value="">Tous les multiplex</option></select>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">Catalogue IPTV</div><span class="badge bc" id="ch-cnt">0 chaînes</span></div>
+    <div class="panel-body"><table>
+      <thead><tr><th>#ID</th><th>Nom</th><th>Pack</th><th>Multiplex</th><th>Fréquence</th><th>URL Multicast</th></tr></thead>
+      <tbody id="ch-body"><tr><td colspan="6" class="empty">Connexion SSE...</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ═══ STB ═══ -->
+<div id="page-stb" class="page">
+  <div class="topbar"><div class="page-title">STB <span>·</span> Boîtiers</div><span class="badge bm" id="stb-cnt">0 STB</span></div>
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">Set-Top Boxes enregistrées</div><span class="badge bm">Live · CLIENTS.json</span></div>
+    <div class="panel-body"><table>
+      <thead><tr><th>STB ID</th><th>Chambre</th><th>Packs</th><th>Chaînes accessibles</th><th>Actions</th></tr></thead>
+      <tbody id="stb-body"><tr><td colspan="5" class="empty">Connexion SSE...</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ═══ SYSTÈME ═══ -->
+<div id="page-systeme" class="page">
+  <div class="topbar"><div class="page-title">Système <span>·</span> Contrôles</div></div>
+  <div class="warn-box"><strong>⚠ Zone sensible</strong><br>Ces actions agissent directement sur le processus Node.js. Si PM2 est actif, le serveur redémarre automatiquement.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Processus Node.js</div><span class="badge bg" id="sys-badge">running</span></div>
+      <div>
+        <div class="mrow"><span class="mkey">Statut</span>    <span class="mval g" id="ss-status">—</span></div>
+        <div class="mrow"><span class="mkey">PID</span>        <span class="mval"    id="ss-pid">—</span></div>
+        <div class="mrow"><span class="mkey">Node.js</span>   <span class="mval"    id="ss-node">—</span></div>
+        <div class="mrow"><span class="mkey">Plateforme</span><span class="mval"    id="ss-platform">—</span></div>
+        <div class="mrow"><span class="mkey">Uptime</span>    <span class="mval g"  id="ss-uptime">—</span></div>
+        <div class="mrow"><span class="mkey">PM2</span>       <span class="mval"    id="ss-pm2">—</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Mémoire</div></div>
+      <div>
+        <div class="mrow"><span class="mkey">RSS</span>          <span class="mval"    id="ss-rss">—</span></div>
+        <div class="mrow"><span class="mkey">Heap utilisé</span> <span class="mval am" id="ss-heap-u">—</span></div>
+        <div class="mrow"><span class="mkey">Heap total</span>   <span class="mval"    id="ss-heap-t">—</span></div>
+        <div class="mrow"><span class="mkey">Système libre</span><span class="mval g"  id="ss-free">—</span></div>
+        <div class="mrow"><span class="mkey">Système total</span><span class="mval"    id="ss-total">—</span></div>
+        <div class="mrow"><span class="mkey">CPU cores</span>    <span class="mval"    id="ss-cpu">—</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Commandes</div></div>
+      <div>
+        <div class="mrow" style="flex-direction:column;align-items:flex-start;gap:10px;padding:16px 20px">
+          <span class="mkey">Redémarrer le serveur</span>
+          <span style="font-size:12px;color:var(--muted);line-height:1.5">Signal d'arrêt propre.<br>PM2 relance automatiquement.</span>
+          <button class="btn am" onclick="doRestart()">↺ Redémarrer</button>
+        </div>
+        <div style="border-top:1px solid var(--border)"></div>
+        <div class="mrow" style="flex-direction:column;align-items:flex-start;gap:10px;padding:16px 20px">
+          <span class="mkey">Recharger les fichiers JSON</span>
+          <button class="btn ac" onclick="doReload()">↻ Recharger</button>
+        </div>
+        <div style="border-top:1px solid var(--border)"></div>
+        <div class="mrow" style="flex-direction:column;align-items:flex-start;gap:10px;padding:16px 20px">
+          <span class="mkey">Vider le journal</span>
+          <button class="btn rd" onclick="clearLogs()">✕ Vider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGS ═══ -->
+<div id="page-logs" class="page">
+  <div class="topbar">
+    <div class="page-title">Journal <span>·</span> Temps réel</div>
+    <div class="topbar-actions">
+      <button class="btn" onclick="clearLogs()">✕ Vider</button>
+      <button class="btn ac" onclick="toggleScroll()" id="scroll-btn">⬇ Auto-scroll ON</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">Événements serveur</div><span class="badge bg">SSE · temps réel</span></div>
+    <div class="log-box" id="log-box"><div class="empty">En attente...</div></div>
+  </div>
+</div>
+
+</main>
+
+<!-- MODAL AJOUT ABONNÉ -->
+<div class="overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title">Ajouter un abonné</div>
+    <div class="fg"><label class="flabel">STB ID</label><input class="finput" id="f-stbid" placeholder="stb-03"></div>
+    <div class="fg"><label class="flabel">Chambre</label><input class="finput" id="f-room" placeholder="03"></div>
+    <div class="fg">
+      <label class="flabel">Packs souscrits</label>
+      <div class="pack-checkbox-grid" id="add-pack-grid"></div>
+    </div>
+    <div class="fg">
+      <label class="flabel">Chaînes à-la-carte (en supplément des packs)</label>
+      <div class="ch-checkbox-grid" id="add-alacarte-grid"></div>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closeAdd()">Annuler</button><button class="btn ac" onclick="submitAdd()">Ajouter</button></div>
+  </div>
+</div>
+
+<!-- MODAL PACK -->
+<div class="overlay" id="modal-pack">
+  <div class="modal">
+    <div class="modal-title" id="pack-modal-title">Créer un pack</div>
+    <div class="fg"><label class="flabel">Identifiant (ex: sport)</label><input class="finput" id="p-id" placeholder="sport"></div>
+    <div class="fg"><label class="flabel">Nom affiché</label><input class="finput" id="p-nom" placeholder="Pack Sport"></div>
+    <div class="fg"><label class="flabel">Description</label><input class="finput" id="p-desc" placeholder="Chaînes sportives"></div>
+    <div class="fg">
+      <label class="flabel">Couleur (hex)</label>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input class="finput" id="p-couleur" placeholder="#4f6ef7" style="flex:1" oninput="document.getElementById('p-color-preview').style.background=this.value">
+        <div id="p-color-preview" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:#4f6ef7;flex-shrink:0"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="flabel">Chaînes du pack</label>
+      <div class="ch-checkbox-grid" id="pack-ch-grid"></div>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closePackModal()">Annuler</button><button class="btn ac" onclick="submitPack()">Enregistrer</button></div>
+  </div>
+</div>
+
+<div id="roverlay"><div class="spinner"></div><span>Redémarrage en cours...</span><span style="font-size:11px;color:var(--muted)">La page se rechargera automatiquement</span></div>
+<div id="notif"></div>
+
+<script>
+// ── ÉTAT ──────────────────────────────────────────────────────────
+let CLIENTS=[], CHAINES=[], PACKS=[];
+let uiLogs=[], abF='', chF='', chPackF='', chMuxF='', autoscroll=true;
+let editingPackId=null;
+
+// ── HORLOGE ──────────────────────────────────────────────────────
+setInterval(()=>{ document.getElementById('clock').textContent=new Date().toLocaleTimeString('fr-FR'); },1000);
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+function nav(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const map={dashboard:'dashboard',packs:'packs',abonnes:'abonné',chaines:'chaîne',stb:'stb',systeme:'système',logs:'journal'};
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.toLowerCase().includes(map[id]||id)) n.classList.add('active'); });
+}
+
+// ── SSE ──────────────────────────────────────────────────────────
+function connectSSE(){
+  const dot=document.getElementById('sse-dot'), lbl=document.getElementById('sse-label');
+  const es=new EventSource('/admin/stream');
+  es.onopen=()=>{ dot.className='on'; lbl.textContent='● En direct'; lbl.className='badge bg'; uiLog('ok','Connexion SSE établie'); };
+  es.onerror=()=>{ dot.className='err'; lbl.textContent='○ Déconnecté'; lbl.className='badge br'; uiLog('err','SSE perdu — reconnexion...'); };
+  es.onmessage=e=>handle(JSON.parse(e.data));
+}
+
+function handle(ev){
+  switch(ev.type){
+    case 'init':
+      applyStatus(ev.payload.status);
+      applyChaines(ev.payload.chaines);
+      applyClients(ev.payload.clients);
+      (ev.payload.logs||[]).slice().reverse().forEach(l=>uiLog(l.level,l.message,l.time));
+      break;
+    case 'status':  applyStatus(ev.payload);  break;
+    case 'clients': applyClients(ev.payload); uiLog('info','CLIENTS.json mis à jour · '+ev.payload.length+' abonnés'); break;
+    case 'chaines': applyChaines(ev.payload); uiLog('info','CHAINES.json mis à jour (packs/chaînes)'); break;
+    case 'log':     uiLog(ev.payload.level,ev.payload.message,ev.payload.time); break;
+    case 'restarting': showRestartOverlay(); break;
+  }
+}
+
+// ── APPLY ────────────────────────────────────────────────────────
+function applyStatus(s){
+  if(!s) return;
+  set('c-mw',s.middleware||'running'); set('c-pid','PID '+s.pid); set('c-up',fmtUp(s.uptime));
+  set('ss-status',s.middleware||'running'); set('ss-pid',s.pid||'—'); set('ss-node',s.node||'—');
+  set('ss-platform',s.platform||'—'); set('ss-uptime',fmtUp(s.uptime));
+  set('ss-pm2',s.pm2?'✓ actif'+(s.pm2Info?' · '+s.pm2Info.restarts+' restart(s)':''):'✗ non détecté');
+  if(s.mem){ set('ss-rss',s.mem.rss+' Mo'); set('ss-heap-u',s.mem.heapUsed+' Mo'); set('ss-heap-t',s.mem.heapTotal+' Mo'); }
+  if(s.system){ set('ss-free',s.system.memFree+' Mo'); set('ss-total',s.system.memTotal+' Mo'); set('ss-cpu',s.system.cpus+' cores · load '+s.system.loadAvg); }
+}
+
+function applyChaines(json){
+  if(!json) return;
+  CHAINES = Array.isArray(json)?json:(json.data||[]);
+  PACKS   = (Array.isArray(json)?[]:(json.packs||[]));
+  set('c-ch',CHAINES.length); set('c-packs',PACKS.length);
+  set('ch-cnt',CHAINES.length+' chaîne'+(CHAINES.length>1?'s':''));
+  renderPacksBars(); renderPacksPage(); renderChaines(chF,chPackF,chMuxF);
+  buildSelects();
+}
+
+function applyClients(data){
+  if(!data) return;
+  CLIENTS=data;
+  set('c-ab',CLIENTS.length); set('d-ab-cnt',CLIENTS.length+' abonné'+(CLIENTS.length>1?'s':''));
+  set('ab-cnt',CLIENTS.length); set('stb-cnt',CLIENTS.length+' STB');
+  renderDashAb(); renderAb(abF); renderSTB();
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function getPackById(id){ return PACKS.find(p=>p.id===id)||null; }
+
+function resolveClientChannels(client){
+  const fromPacks=new Set();
+  (client.packs||[]).forEach(pid=>{
+    const pk=getPackById(pid);
+    if(pk) pk.chaines.forEach(n=>fromPacks.add(n));
+  });
+  const all=new Set([...fromPacks,...(client.subscriptions||[])]);
+  return CHAINES.filter(ch=>all.has(ch.name));
+}
+
+function packTagHtml(packId){
+  const pk=getPackById(packId);
+  if(!pk) return `<span class="tag-pack" style="background:rgba(107,112,128,.1);color:var(--muted);border-color:rgba(107,112,128,.2)">${packId}</span>`;
+  const col=pk.couleur||'#6b7080';
+  return `<span class="tag-pack" style="background:${col}18;color:${col};border-color:${col}40">${pk.nom}</span>`;
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────
+function renderDashAb(){
+  document.getElementById('d-ab-body').innerHTML = CLIENTS.length===0
+    ? '<tr><td colspan="5" class="empty">Aucun abonné</td></tr>'
+    : CLIENTS.map(c=>{
+        const resolved=resolveClientChannels(c);
+        return `<tr>
+          <td class="mono">${c.stb_id}</td>
+          <td>Chambre ${c.room}</td>
+          <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
+          <td class="mono" style="color:var(--muted)">${(c.subscriptions||[]).length}</td>
+          <td class="mono" style="color:var(--green)">${resolved.length}</td>
+        </tr>`;
+      }).join('');
+}
+
+function renderPacksBars(){
+  const el=document.getElementById('d-pack-bars');
+  set('d-pack-cnt',PACKS.length+' pack'+(PACKS.length>1?'s':''));
+  if(!PACKS.length){ el.innerHTML='<div class="empty">Aucun pack défini</div>'; return; }
+  const max=Math.max(...PACKS.map(p=>p.chaines.length),1);
+  el.innerHTML=PACKS.map(p=>`
+    <div class="prog-row">
+      <div class="prog-head">
+        <span class="prog-name" style="color:${p.couleur||'var(--text)'}">${p.nom}</span>
+        <span class="prog-count">${p.chaines.length} chaîne${p.chaines.length>1?'s':''}</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${(p.chaines.length/max*100).toFixed(0)}%;background:${p.couleur||'var(--accent)'}"></div></div>
+    </div>`).join('');
+}
+
+// ── PAGE PACKS ───────────────────────────────────────────────────
+function renderPacksPage(){
+  const grid=document.getElementById('packs-grid');
+  if(!PACKS.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1">Aucun pack défini. Cliquez sur "+ Créer un pack".</div>'; return; }
+  grid.innerHTML=PACKS.map(p=>{
+    const abonnes=CLIENTS.filter(c=>(c.packs||[]).includes(p.id)).length;
+    return `<div class="pack-card">
+      <div class="pack-header">
+        <div style="flex:1">
+          <div class="pack-name">${p.nom}</div>
+          <div class="pack-desc">${p.description||''}</div>
+        </div>
+        <div class="pack-color-dot" style="background:${p.couleur||'#6b7080'}"></div>
+      </div>
+      <div class="pack-body">
+        <div class="pack-ch-list">
+          ${p.chaines.slice(0,8).map(n=>`<span class="pack-ch-item">${n}</span>`).join('')}
+          ${p.chaines.length>8?`<span class="pack-ch-item" style="color:var(--accent)">+${p.chaines.length-8} autres</span>`:''}
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">
+          ${p.chaines.length} chaîne${p.chaines.length>1?'s':''} · ${abonnes} abonné${abonnes>1?'s':''}
+        </div>
+        <div class="pack-footer">
+          <button class="btn ac" style="flex:1" onclick="editPack('${p.id}')">✎ Modifier</button>
+          <button class="btn rd" onclick="deletePack('${p.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PAGE ABONNÉS ─────────────────────────────────────────────────
+function renderAb(f=''){
+  const list=CLIENTS.filter(c=>!f||c.stb_id.toLowerCase().includes(f.toLowerCase())||c.room.includes(f));
+  set('ab-cnt',list.length);
+  document.getElementById('ab-body').innerHTML = list.length===0
+    ? '<tr><td colspan="5" class="empty">Aucun résultat</td></tr>'
+    : list.map(c=>`
+      <tr style="cursor:pointer" onclick="showAbEdit('${c.stb_id}')">
+        <td class="mono">${c.stb_id}</td>
+        <td>Chambre ${c.room}</td>
+        <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
+        <td class="mono" style="color:var(--muted)">${(c.subscriptions||[]).length}</td>
+        <td><button class="btn rd" onclick="event.stopPropagation();delAb('${c.stb_id}')">✕</button></td>
+      </tr>`).join('');
+}
+
+function filterAb(v){ abF=v; renderAb(v); }
+
+function showAbEdit(stbId){
+  const c=CLIENTS.find(x=>x.stb_id===stbId); if(!c) return;
+  const resolved=resolveClientChannels(c);
+  const el=document.getElementById('ab-edit');
+
+  // Grille packs (checkboxes visuels)
+  const packGrid=PACKS.map(p=>{
+    const checked=(c.packs||[]).includes(p.id);
+    return `<label class="pack-cb-item${checked?' checked':''}" onclick="toggleAbPack('${stbId}','${p.id}',this)">
+      <input type="checkbox" ${checked?'checked':''}>
+      <div class="pack-cb-dot" style="background:${p.couleur||'#6b7080'}"></div>
+      <div style="flex:1"><div class="pack-cb-name">${p.nom}</div><div class="pack-cb-count">${p.chaines.length} chaînes</div></div>
+    </label>`;
+  }).join('');
+
+  // Grille à-la-carte (chaînes hors packs)
+  const fromPackNames=new Set();
+  (c.packs||[]).forEach(pid=>{ const pk=getPackById(pid); if(pk) pk.chaines.forEach(n=>fromPackNames.add(n)); });
+  const alaCarteGrid=CHAINES.map(ch=>{
+    const inPack=fromPackNames.has(ch.name);
+    const checked=(c.subscriptions||[]).includes(ch.name);
+    return `<label class="ch-cb-item${checked?' checked':''}${inPack?' disabled':''}" 
+      title="${inPack?'Déjà inclus dans un pack':''}"
+      onclick="${inPack?'event.preventDefault()':'toggleAbAlaCarte(\''+stbId+'\',\''+ch.name+'\',this)'}">
+      <input type="checkbox" ${checked?'checked':''} ${inPack?'disabled':''}>
+      <span style="${inPack?'color:var(--muted);text-decoration:line-through':''}">${ch.name}</span>
+    </label>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div style="padding:16px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div>
+          <div style="font-size:15px;font-weight:700">${c.stb_id}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Chambre ${c.room} · ${resolved.length} chaînes accessibles</div>
+        </div>
+      </div>
+      <div class="edit-section">
+        <div class="edit-section-title">Packs souscrits</div>
+        <div class="pack-checkbox-grid">${packGrid||'<div style="color:var(--muted);font-size:12px">Aucun pack défini</div>'}</div>
+      </div>
+      <div class="edit-section">
+        <div class="edit-section-title">Chaînes à-la-carte</div>
+        <div class="ch-checkbox-grid">${alaCarteGrid}</div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:rgba(79,110,247,.06);border-radius:8px;border:1px solid rgba(79,110,247,.15)">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Chaînes accessibles (${resolved.length})</div>
+        <div class="tags">${resolved.map(ch=>`<span class="tag">${ch.name}</span>`).join('')||'<span style="color:var(--muted);font-size:11px">Aucune</span>'}</div>
+      </div>
+    </div>`;
+}
+
+async function toggleAbPack(stbId, packId, label){
+  const c=CLIENTS.find(x=>x.stb_id===stbId); if(!c) return;
+  const hasPack=(c.packs||[]).includes(packId);
+  const newPacks=hasPack?(c.packs||[]).filter(p=>p!==packId):[...(c.packs||[]),packId];
+  try {
+    const r=await fetch('/admin/clients/'+stbId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({packs:newPacks})});
+    if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
+    notify((hasPack?'Pack retiré : ':'Pack ajouté : ')+(getPackById(packId)||{nom:packId}).nom);
+    // Le SSE met à jour CLIENTS et re-rend showAbEdit
+    setTimeout(()=>showAbEdit(stbId),300);
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+async function toggleAbAlaCarte(stbId, chName, label){
+  const c=CLIENTS.find(x=>x.stb_id===stbId); if(!c) return;
+  const has=(c.subscriptions||[]).includes(chName);
+  const newSubs=has?(c.subscriptions||[]).filter(s=>s!==chName):[...(c.subscriptions||[]),chName];
+  try {
+    const r=await fetch('/admin/clients/'+stbId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscriptions:newSubs})});
+    if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
+    notify((has?'Chaîne retirée : ':'Chaîne ajoutée : ')+chName);
+    setTimeout(()=>showAbEdit(stbId),300);
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+// ── PAGE CHAÎNES ─────────────────────────────────────────────────
+function renderChaines(nf='',pf='',mf=''){
+  const list=CHAINES.filter(ch=>{
+    const okN=!nf||ch.name.toLowerCase().includes(nf.toLowerCase());
+    const okP=!pf||ch.pack===pf;
+    const okM=!mf||ch.multiplex===mf;
+    return okN&&okP&&okM;
+  });
+  set('ch-cnt',list.length+' chaîne'+(list.length>1?'s':''));
+  document.getElementById('ch-body').innerHTML=list.length===0
+    ? '<tr><td colspan="6" class="empty">Aucune chaîne</td></tr>'
+    : list.map(ch=>{
+        const pk=getPackById(ch.pack||'');
+        const pTag=pk?`<span class="tag-pack" style="background:${pk.couleur||'#6b7080'}18;color:${pk.couleur||'#6b7080'};border-color:${pk.couleur||'#6b7080'}40">${pk.nom}</span>`:`<span style="color:var(--muted);font-size:11px">${ch.pack||'—'}</span>`;
+        return `<tr><td class="mono" style="color:var(--muted)">${ch.id}</td><td><strong>${ch.name}</strong></td><td>${pTag}</td><td><span class="tag-mux">${ch.multiplex}</span></td><td class="mono" style="color:var(--muted)">${ch.frequency}</td><td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">${ch.multicast.url}</td></tr>`;
+      }).join('');
+}
+
+function buildSelects(){
+  const ps=document.getElementById('pack-sel');
+  const curP=ps.value;
+  while(ps.options.length>1) ps.remove(1);
+  PACKS.forEach(p=>ps.add(new Option(p.nom,p.id)));
+  ps.value=curP;
+
+  const ms=document.getElementById('mux-sel');
+  const curM=ms.value;
+  while(ms.options.length>1) ms.remove(1);
+  [...new Set(CHAINES.map(c=>c.multiplex))].sort().forEach(m=>ms.add(new Option(m,m)));
+  ms.value=curM;
+}
+
+function filterCh(v){ chF=v;     renderChaines(v,chPackF,chMuxF); }
+function filterPack(v){ chPackF=v; renderChaines(chF,v,chMuxF); }
+function filterMux(v){ chMuxF=v;  renderChaines(chF,chPackF,v); }
+
+// ── PAGE STB ─────────────────────────────────────────────────────
+function renderSTB(){
+  document.getElementById('stb-body').innerHTML=CLIENTS.length===0
+    ? '<tr><td colspan="5" class="empty">Aucune STB</td></tr>'
+    : CLIENTS.map(c=>{
+        const resolved=resolveClientChannels(c);
+        return `<tr>
+          <td class="mono">${c.stb_id}</td>
+          <td>Chambre ${c.room}</td>
+          <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
+          <td class="mono" style="color:var(--green)">${resolved.length} chaîne${resolved.length>1?'s':''}</td>
+          <td><button class="btn ac" onclick="nav('abonnes');showAbEdit('${c.stb_id}')">Gérer</button></td>
+        </tr>`;
+      }).join('');
+}
+
+// ── MODAL AJOUT ABONNÉ ────────────────────────────────────────────
+function openAddModal(){
+  document.getElementById('modal-add').classList.add('open');
+  ['f-stbid','f-room'].forEach(i=>document.getElementById(i).value='');
+  // Packs
+  document.getElementById('add-pack-grid').innerHTML=PACKS.map(p=>`
+    <label class="pack-cb-item" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${p.id}">
+      <div class="pack-cb-dot" style="background:${p.couleur||'#6b7080'}"></div>
+      <div style="flex:1"><div class="pack-cb-name">${p.nom}</div><div class="pack-cb-count">${p.chaines.length} chaînes</div></div>
+    </label>`).join('');
+  // À-la-carte
+  document.getElementById('add-alacarte-grid').innerHTML=CHAINES.map(ch=>`
+    <label class="ch-cb-item" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${ch.name}"><span>${ch.name}</span>
+    </label>`).join('');
+  setTimeout(()=>document.getElementById('f-stbid').focus(),100);
+}
+function closeAdd(){ document.getElementById('modal-add').classList.remove('open'); }
+
+async function submitAdd(){
+  const stb_id=document.getElementById('f-stbid').value.trim();
+  const room=document.getElementById('f-room').value.trim();
+  const packs=[...document.querySelectorAll('#add-pack-grid input:checked')].map(i=>i.value);
+  const subscriptions=[...document.querySelectorAll('#add-alacarte-grid input:checked')].map(i=>i.value);
+  if(!stb_id||!room){ notify('STB ID et chambre requis'); return; }
+  try {
+    const r=await fetch('/admin/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({stb_id,room,packs,subscriptions})});
+    const j=await r.json();
+    if(!r.ok){ notify(j.error||'Erreur'); return; }
+    closeAdd(); notify('Abonné '+stb_id+' ajouté · chambre '+room);
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+async function delAb(id){
+  if(!confirm('Supprimer l\'abonné '+id+' ?')) return;
+  try {
+    const r=await fetch('/admin/clients/'+id,{method:'DELETE'});
+    if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
+    notify('Abonné '+id+' supprimé');
+    document.getElementById('ab-edit').innerHTML='<div class="empty">Abonné supprimé</div>';
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+// ── MODAL PACK ────────────────────────────────────────────────────
+function openPackModal(packId){
+  editingPackId=packId||null;
+  const pk=packId?getPackById(packId):null;
+  set('pack-modal-title',pk?'Modifier le pack':'Créer un pack');
+  document.getElementById('p-id').value=pk?pk.id:'';
+  document.getElementById('p-id').disabled=!!pk;
+  document.getElementById('p-nom').value=pk?pk.nom:'';
+  document.getElementById('p-desc').value=pk?pk.description:'';
+  document.getElementById('p-couleur').value=pk?pk.couleur:'#4f6ef7';
+  document.getElementById('p-color-preview').style.background=pk?pk.couleur:'#4f6ef7';
+  const checked=pk?new Set(pk.chaines):new Set();
+  document.getElementById('pack-ch-grid').innerHTML=CHAINES.map(ch=>`
+    <label class="ch-cb-item${checked.has(ch.name)?' checked':''}" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${ch.name}" ${checked.has(ch.name)?'checked':''}><span>${ch.name}</span>
+    </label>`).join('');
+  document.getElementById('modal-pack').classList.add('open');
+}
+
+function editPack(id){ openPackModal(id); }
+function closePackModal(){ document.getElementById('modal-pack').classList.remove('open'); }
+
+async function submitPack(){
+  const id=document.getElementById('p-id').value.trim();
+  const nom=document.getElementById('p-nom').value.trim();
+  const description=document.getElementById('p-desc').value.trim();
+  const couleur=document.getElementById('p-couleur').value.trim()||'#6b7080';
+  const chaines=[...document.querySelectorAll('#pack-ch-grid input:checked')].map(i=>i.value);
+  if(!id||!nom){ notify('ID et nom requis'); return; }
+  try {
+    const url=editingPackId?'/admin/packs/'+editingPackId:'/admin/packs';
+    const method=editingPackId?'PUT':'POST';
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nom,description,couleur,chaines})});
+    const j=await r.json();
+    if(!r.ok){ notify(j.error||'Erreur'); return; }
+    closePackModal();
+    notify((editingPackId?'Pack modifié : ':'Pack créé : ')+nom+' · '+chaines.length+' chaînes');
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+async function deletePack(id){
+  const pk=getPackById(id);
+  const abonnes=CLIENTS.filter(c=>(c.packs||[]).includes(id)).length;
+  const msg=`Supprimer le pack "${pk?pk.nom:id}" ?\n${abonnes>0?abonnes+' abonné(s) perdront ce pack.':'Aucun abonné affecté.'}`;
+  if(!confirm(msg)) return;
+  try {
+    const r=await fetch('/admin/packs/'+id,{method:'DELETE'});
+    if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
+    notify('Pack supprimé : '+(pk?pk.nom:id));
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+// ── SYSTÈME ──────────────────────────────────────────────────────
+async function doRestart(){
+  if(!confirm('Redémarrer le serveur ?\nPM2 relance automatiquement si actif.')) return;
+  try{ await fetch('/admin/restart',{method:'POST'}); }catch(_){}
+  showRestartOverlay();
+}
+function showRestartOverlay(){
+  document.getElementById('roverlay').classList.add('show');
+  const t=setInterval(()=>{ fetch('/admin/status').then(r=>{ if(r.ok){ clearInterval(t); document.getElementById('roverlay').classList.remove('show'); connectSSE(); notify('Serveur redémarré ✓'); }}).catch(()=>{}); },2000);
+}
+async function doReload(){
+  try {
+    const [rc,ra]=await Promise.all([fetch('/admin/chaines'),fetch('/admin/clients')]);
+    if(rc.ok) applyChaines(await rc.json());
+    if(ra.ok) applyClients(await ra.json());
+    notify('Fichiers JSON rechargés');
+    uiLog('ok','Rechargement manuel · CHAINES.json + CLIENTS.json');
+  } catch(e){ notify('Erreur : '+e.message); }
+}
+
+// ── LOGS ─────────────────────────────────────────────────────────
+function uiLog(level,message,time){
+  const t=time||new Date().toLocaleTimeString('fr-FR');
+  uiLogs.unshift({level,message,time:t});
+  if(uiLogs.length>200) uiLogs.pop();
+  renderLogs();
+}
+function renderLogs(){
+  const box=document.getElementById('log-box');
+  box.innerHTML=uiLogs.length===0?'<div class="empty">Aucun événement</div>':uiLogs.map(l=>`<div class="ll"><span class="lt">${l.time}</span><span class="l${l.level}">[${l.level.toUpperCase()}]</span><span>${l.message}</span></div>`).join('');
+  if(autoscroll) box.scrollTop=0;
+}
+function clearLogs(){ uiLogs=[]; renderLogs(); notify('Journal vidé'); }
+function toggleScroll(){ autoscroll=!autoscroll; document.getElementById('scroll-btn').textContent='⬇ Auto-scroll '+(autoscroll?'ON':'OFF'); }
+
+// ── UTILS ────────────────────────────────────────────────────────
+function set(id,val){ const e=document.getElementById(id); if(e) e.textContent=val; }
+function fmtUp(s){ if(!s&&s!==0) return '—'; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return h>0?`${h}h ${m}m`:m>0?`${m}m ${sec}s`:`${sec}s`; }
+let _nt;
+function notify(msg){ const e=document.getElementById('notif'); e.textContent=msg; e.classList.add('show'); clearTimeout(_nt); _nt=setTimeout(()=>e.classList.remove('show'),3500); }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); }));
+
+// ── DÉMARRAGE ────────────────────────────────────────────────────
+connectSSE();
+</script>
+</body>
+</html>

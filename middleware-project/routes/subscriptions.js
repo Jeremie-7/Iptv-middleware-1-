@@ -68,7 +68,7 @@ router.get("/:stbId", (req, res) => {
     });
   }
 
-  const subscriber = subscriber.find(s => s.stb_id === stbId);
+  const subscriber = subscribers.find(s => s.stb_id === stbId);
   if (!subscriber) {
     return res.status(404).json({ error: "STB inconnue" });
   }

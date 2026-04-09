@@ -17,6 +17,8 @@ router.get("/:channelId", (req, res) => {
   }
 
   const channel = channels.find(c => c.id === channelId);
+  // const res = await fetch('/channels');
+  // CHAINES_DATA = (await res.json()).data;
   
 
   //gestion de l'erreurre 404
