@@ -2,20 +2,19 @@
   {
     "room": "01",
     "stb_id": "stb-01",
-    "packs": [
-      
-    ],
+    "packs": [],
     "subscriptions": [
       "Arte",
-      "BFM TV"
+      "BFM TV",
+      "France 2",
+      "franceinfo",
+      "France 4"
     ]
   },
   {
     "room": "02",
     "stb_id": "Pythonapp",
-    "packs": [
-      
-    ],
+    "packs": [],
     "subscriptions": [
       "Arte",
       "BFM TV"

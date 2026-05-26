@@ -59,7 +59,7 @@ setInterval(() => {
 function requireAdminAuth(req, res, next) {
   // Routes publiques — pas besoin de token
   // const publicRoutes = ["/auth/login", "/auth/verify"];
-  const publicRoutes = ["/auth/login", "/auth/verify", "/packs", "/chaines/sync"];
+  const publicRoutes = ["/auth/login", "/auth/verify", "/packs", "/chaines/sync", "/register", "/login"];
   if (publicRoutes.some(r => req.path.startsWith(r))) return next();
 
   // Lecture du token depuis le header Authorization
@@ -126,6 +126,44 @@ router.post("/auth/login", (req, res) => {
     expires:  new Date(Date.now() + SESSION_DURATION).toISOString(),
   });
 });
+
+
+// router.post("/login", (req, res) => {
+//   try {
+//     const { identifiant, password } = req.body;
+//     if (!identifiant || !password)
+//       return res.status(400).json({ error: "Identifiant et mot de passe requis" });
+
+//     const clients = readClients();
+//     const client  = clients.find(
+//       c => c.stb_id.toLowerCase() === identifiant.trim().toLowerCase()
+//     );
+//     if (!client)
+//       return res.status(401).json({ error: "Identifiant ou mot de passe incorrect" });
+
+//     // Si pas de password_hash → client créé manuellement (stb-01, Pythonapp...)
+//     // On accepte n'importe quel mot de passe non vide (usage interne)
+//     if (client.password_hash) {
+//       const crypto = require("crypto");
+//       const hash   = crypto.createHash("sha256")
+//         .update(password + identifiant.trim()).digest("hex");
+//       if (hash !== client.password_hash)
+//         return res.status(401).json({ error: "Identifiant ou mot de passe incorrect" });
+//     }
+
+//     const chainesJson = readChaines();
+//     const channels    = resolveChannels(client, chainesJson);
+//     pushLog("ok", `Connexion client · ${identifiant}`);
+
+//     res.json({
+//       success: true, stbId: client.stb_id, room: client.room,
+//       packs: client.packs || [], subscriptions: client.subscriptions || [],
+//       channels, channelCount: channels.length,
+//     });
+//   } catch(err) {
+//     res.status(500).json({ error: "Erreur serveur" });
+//   }
+// });
 
 // ══════════════════════════════════════════════════════════════
 // GET /admin/auth/verify

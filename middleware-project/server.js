@@ -56,10 +56,22 @@ app.use("/admin", adminRoute);
 // app.use("/register", adminRoute);  // POST /register
 // app.use("/login",    adminRoute);  // POST /login
 // app.use("/stb", stbRoute);//lien avec monitoring 
+// app.post("/register", (req, res) => {
+//   req.url = "/register";
+//   adminRoute(req, res, () => res.status(404).json({ error: "Route non trouvée" }));
+// });
+// Routes publiques client
 app.post("/register", (req, res) => {
   req.url = "/register";
   adminRoute(req, res, () => res.status(404).json({ error: "Route non trouvée" }));
 });
+app.post("/login", (req, res) => {
+  req.url = "/login";
+  adminRoute(req, res, () => res.status(404).json({ error: "Route non trouvée" }));
+});
+// Alias : /abonne → pageAbonnee.html (insensible à la casse)
+app.get(/^\/abonn/i, (req, res) => res.redirect("/pageAbonnee.html"));
+
 app.use(express.static("public"));
 
 
@@ -138,44 +150,44 @@ httpsServer.listen(3000, () => {
 //The WebSocket API makes it possible to open a two-way interactive communication session between the user's browser and a server. With this API, you can send messages to a server and receive responses without having to poll the server for a reply
 
 //POUR RECEVOI LES CHAINES DIFFUSE DYNAMIQUEMENT (web socket)
-const { WebSocketServer } = require("ws");
+// const { WebSocketServer } = require("ws");
 
-// Lance le serveur WebSocket sur le même port HTTPS
-const wss = new WebSocketServer({ server: httpsServer });
+// // Lance le serveur WebSocket sur le même port HTTPS
+// const wss = new WebSocketServer({ server: httpsServer });
 
-wss.on("connection", (ws, req) => {
-  console.log("[WS] Streamer connecté");
+// wss.on("connection", (ws, req) => {
+//   console.log("[WS] Streamer connecté");
 
-  ws.on("message", (data) => {
-    try {
-      const msg = JSON.parse(data);
+//   ws.on("message", (data) => {
+//     try {
+//       const msg = JSON.parse(data);
 
-      if (msg.type === "sync_channels" && Array.isArray(msg.data)) { //vérifie si la valeur passée est un Array (tableau ou lise )
-        // Même logique que /admin/chaines/sync
-        const chaines = JSON.parse(fs.readFileSync(CHAINES_PATH, "utf8"));// Parser le json (je crois a verifier)
-        chaines.data = msg.data.map(ch => {
-          const ex = (chaines.data || []).find(c => c.id === ch.id);
-          return { ...ch, pack: ex ? ex.pack : "divertissement" };
-        });
-        chaines.count = chaines.data.length;
-        fs.writeFileSync(CHAINES_PATH, JSON.stringify(chaines, null, 2));
+//       if (msg.type === "sync_channels" && Array.isArray(msg.data)) { //vérifie si la valeur passée est un Array (tableau ou lise )
+//         // Même logique que /admin/chaines/sync
+//         const chaines = JSON.parse(fs.readFileSync(CHAINES_PATH, "utf8"));// Parser le json (je crois a verifier)
+//         chaines.data = msg.data.map(ch => {
+//           const ex = (chaines.data || []).find(c => c.id === ch.id);
+//           return { ...ch, pack: ex ? ex.pack : "divertissement" };
+//         });
+//         chaines.count = chaines.data.length;
+//         fs.writeFileSync(CHAINES_PATH, JSON.stringify(chaines, null, 2));
 
-        // Notifie le dashboard
-        const adminRouter = require("./routes/admin.js");
-        if (adminRouter.broadcastSSE) {
-          adminRouter.broadcastSSE({ type: "chaines", payload: chaines });
-        }
+//         // Notifie le dashboard
+//         const adminRouter = require("./routes/admin.js");
+//         if (adminRouter.broadcastSSE) {
+//           adminRouter.broadcastSSE({ type: "chaines", payload: chaines });
+//         }
 
-        ws.send(JSON.stringify({ ok: true, count: chaines.data.length }));
-        console.log(`[WS] Chaînes mises à jour · ${chaines.data.length}`);
-      }
-    } catch (err) {
-      console.error("[WS] Erreur :", err.message);
-    }
-  });
+//         ws.send(JSON.stringify({ ok: true, count: chaines.data.length }));
+//         console.log(`[WS] Chaînes mises à jour · ${chaines.data.length}`);
+//       }
+//     } catch (err) {
+//       console.error("[WS] Erreur :", err.message);
+//     }
+//   });
 
-  ws.on("close", () => console.log("[WS] Streamer déconnecté"));
-});
+//   ws.on("close", () => console.log("[WS] Streamer déconnecté"));
+// });
 
 
 
