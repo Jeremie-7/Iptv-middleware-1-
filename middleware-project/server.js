@@ -33,9 +33,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// interface web admin
-app.use(express.static(path.join(__dirname, "public")));
-
 // J'ai fais un dashboard admin et j'ai mis un système d’authentification pour pouvoir accéder au dashboard admin; Cependant lorsque je rentre le mdp et et l’identifiant je reçois : "route non trouvée"; Que faire ?
 
 // Importation et montage des routes IPTV
@@ -47,18 +44,23 @@ const statusRoute = require("./routes/status");
 const adminRoute = require("./routes/admin.js");
 // const stbRoute = require("./routes/stb");
 
-app.use(express.json());
 app.use("/channels", channelsRoutes); // utilise un middleware (fonction qui sinterpse entre une requete et une reponse) (Bien utiliser le mot middleware pour definir)
 app.use("/subscriptions", subscriptionsRoutes);// utilise un middleware (fonction qui sinterpse entre une requete et une reponse)
 app.use("/auth", authRoutes);// utilise un middleware (fonction qui sinterpse entre une requete et une reponse)
 app.use("/stream", streamRoute);// utilise un middleware (fonction qui sinterpse entre une requete et une reponse)
 app.use("/status", statusRoute);// utilise un middleware (fonction qui sinterpse entre une requete et une reponse)
 app.use("/admin", adminRoute);
+
+
 // Routes publiques (sans authentification TLS requise) (pour client)
 // app.use("/register", adminRoute);  // POST /register
 // app.use("/login",    adminRoute);  // POST /login
 // app.use("/stb", stbRoute);//lien avec monitoring 
-// app.use(express.static("public"));
+app.post("/register", (req, res) => {
+  req.url = "/register";
+  adminRoute(req, res, () => res.status(404).json({ error: "Route non trouvée" }));
+});
+app.use(express.static("public"));
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -99,13 +101,13 @@ app.use(express.static(path.join(__dirname, "public")));
 //Route explicite qui redirige auomatiquement vers adimn.html
 //Ainsi pas besoin de taper de le chemin complet seul celien suffit: https://middleware:3000/
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// app.get("/", (req, res) => {
-//   res.redirect("/admin.html"); // (barriere de secu) afin de s'authentifier avant d'accerder au dashboard.
-// });
-//J'ai la possibilté aussi de creer un index.tml qui redirige directement vers admin.html
+app.get("/", (req, res) => {
+  res.redirect("/admin.html"); // (barriere de secu) afin de s'authentifier avant d'accerder au dashboard.
+});
+// J'ai la possibilté aussi de creer un index.tml qui redirige directement vers admin.html
 // Avec cette comande: "echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/admin.html"></head></html>' \
 //  > /home/ciel/Bureau/Projet_2026/middleware-project/public/index.html"
-//Car qaund je tape le lien express cherche un index mais cmmme il n'y en a pas: erreur
+// Car qaund je tape le lien express cherche un index mais cmmme il n'y en a pas: erreur
 // j'ai opté pour celle ci-desss car moins longue a metre en oeuvre (meme si l'autre reste tres courte aussi)
 
 
