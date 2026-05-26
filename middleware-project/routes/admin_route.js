@@ -45,7 +45,7 @@ function validateToken(token) {
   }
   return session;
 }
-
+//
 // Nettoyage automatique des sessions expirées toutes les heures
 setInterval(() => {
   const now = Date.now();
