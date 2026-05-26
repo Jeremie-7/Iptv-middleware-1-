@@ -1,36 +1,63 @@
-const express = require("express");
-const router = express.Router();
-const channels = require("../Data/CHAINES.json");
+// routes/channels.js
+// Expose la liste des chaînes IPTV disponibles.
+// Utilisé par le dashboard admin et le streamer.
 
-// Get all channels
+const express = require("express");
+const router  = express.Router();
+const fs      = require("fs");
+const path    = require("path");
+
+const CHAINES_PATH = path.join(__dirname, "../Data/CHAINES.json");
+
+// ── Lecture dynamique ────────────────────────────────────────────
+// Relit le fichier à chaque requête → toujours à jour si le streamer
+// a mis à jour CHAINES.json via POST /admin/chaines/sync
+function readChaines() {
+  return JSON.parse(fs.readFileSync(CHAINES_PATH, "utf8"));
+}
+
+// ────────────────────────────────────────────────────────────────
+// GET /channels
+// Retourne l'objet complet CHAINES.json (packs + data)
+// ────────────────────────────────────────────────────────────────
 router.get("/", (req, res) => {
-  res.json(channels);
+  try {
+    res.json(readChaines());
+  } catch (err) {
+    console.error("[ERROR] GET /channels :", err.message);
+    res.status(500).json({ error: "Erreur lecture CHAINES.json" });
+  }
 });
 
-// Get single channel by ID
+// ────────────────────────────────────────────────────────────────
+// GET /channels/:channelId
+// Retourne une chaîne par son ID numérique
+// CORRIGÉ : cherche dans json.data (et non dans json directement)
+// ────────────────────────────────────────────────────────────────
 router.get("/:channelId", (req, res) => {
-  const channelId = req.params.channelId;
-  
-  // Validate input
-  if (!channelId || typeof channelId !== 'string') {
-    return res.status(400).json({ error: "ID de chaîne invalide" });
+  try {
+    const channelId = parseInt(req.params.channelId, 10);
+
+    if (isNaN(channelId)) {
+      return res.status(400).json({ error: "ID de chaîne invalide (doit être un entier)" });
+    }
+
+    const json    = readChaines();
+    const channel = (json.data || []).find(c => c.id === channelId); // CORRIGÉ
+
+    if (!channel) {
+      return res.status(404).json({
+        error:     "Chaîne non trouvée",
+        channelId
+      });
+    }
+
+    res.json(channel);
+
+  } catch (err) {
+    console.error("[ERROR] GET /channels/:id :", err.message);
+    res.status(500).json({ error: "Erreur serveur" });
   }
-
-  const channel = channels.find(c => c.id === channelId);
-  // const res = await fetch('/channels');
-  // CHAINES_DATA = (await res.json()).data;
-  
-
-  //gestion de l'erreurre 404
-  if (!channel) {
-    return res.status(404).json({ 
-      error: "Chaîne non trouvée",
-      channelId: channelId
-    });
-  }
-
-  res.json(channel);
 });
 
 module.exports = router;
-

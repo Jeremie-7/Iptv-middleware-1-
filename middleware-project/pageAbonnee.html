@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPTV — Inscription Abonné</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0e14;--bg2:#13161f;--bg3:#1a1e2a;
+  --border:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.14);
+  --text:#e8eaf2;--muted:#6b7080;
+  --accent:#4f6ef7;--green:#22d3a0;--amber:#f59e0b;--red:#f43f5e;--cyan:#06b6d4;--purple:#7c3aed;
+  --mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(79,110,247,.03)1px,transparent 1px),linear-gradient(90deg,rgba(79,110,247,.03)1px,transparent 1px);
+  background-size:40px 40px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:540px;overflow:hidden;position:relative;z-index:1}
+
+/* HEADER */
+.card-header{padding:32px 36px 28px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(79,110,247,.08),rgba(6,182,212,.04))}
+.hotel-badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(79,110,247,.12);border:1px solid rgba(79,110,247,.2);padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:14px}
+.card-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.card-title span{color:var(--accent)}
+.card-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* BODY */
+.card-body{padding:30px 36px 36px}
+
+/* FORM */
+.form-group{margin-bottom:20px}
+.form-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:14px;padding:11px 14px;border-radius:8px;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--muted)}
+.form-input.error{border-color:var(--red)}
+
+/* INPUT PASSWORD wrapper */
+.input-wrap{position:relative}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px}
+.toggle-pw:hover{color:var(--text)}
+
+/* PACK GRID */
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+.pack-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.pack-item:hover{border-color:var(--bh)}
+.pack-item.selected{border-color:var(--accent);background:rgba(79,110,247,.08)}
+.pack-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pack-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.pack-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.pack-check{margin-left:auto;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.pack-item.selected .pack-check{background:var(--accent);border-color:var(--accent)}
+.pack-item.selected .pack-check::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+
+/* RADIO CHAMBRE */
+.room-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:2px}
+.room-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;cursor:pointer;text-align:center;font-family:var(--mono);font-size:12px;transition:all .15s}
+.room-item:hover{border-color:var(--bh)}
+.room-item.selected{border-color:var(--cyan);background:rgba(6,182,212,.08);color:var(--cyan)}
+
+/* PASSWORD STRENGTH */
+.pw-strength{margin-top:8px;height:3px;border-radius:2px;background:var(--bg3);overflow:hidden}
+.pw-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+.pw-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:5px}
+
+/* SUBMIT */
+.btn-submit{width:100%;background:var(--accent);color:#fff;border:none;font-family:var(--sans);font-size:15px;font-weight:700;padding:14px;border-radius:8px;cursor:pointer;transition:all .15s;letter-spacing:.02em;margin-top:8px}
+.btn-submit:hover{background:#3a5af0;transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* MESSAGES */
+.msg{padding:12px 16px;border-radius:8px;font-family:var(--mono);font-size:12px;margin-bottom:20px;display:none}
+.msg.success{background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.25);color:var(--green)}
+.msg.error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);color:var(--red)}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* FOOTER LINK */
+.footer-link{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:20px}
+.footer-link a{color:var(--accent);text-decoration:none}
+.footer-link a:hover{text-decoration:underline}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUCCESS SCREEN */
+.success-screen{display:none;text-align:center;padding:20px 0}
+.success-icon{font-size:48px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--green);margin-bottom:8px}
+.success-sub{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6}
+.success-info{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin:20px 0;text-align:left}
+.success-info-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:4px 0}
+.success-info-row span:first-child{color:var(--muted)}
+.success-info-row span:last-child{color:var(--text);font-weight:600}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .card-header,.card-body{padding-left:22px;padding-right:22px}
+  .pack-grid{grid-template-columns:1fr}
+  .room-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="hotel-badge">Hôtel IPTV · Inscription</div>
+    <h1 class="card-title">Créer votre <span>abonnement</span></h1>
+    <p class="card-sub">Accédez aux chaînes TV de votre chambre</p>
+  </div>
+
+  <!-- BODY -->
+  <div class="card-body">
+
+    <!-- Message feedback -->
+    <div class="msg" id="msg"></div>
+
+    <!-- FORMULAIRE -->
+    <form id="form" autocomplete="off">
+
+      <!-- Identifiant -->
+      <div class="form-group">
+        <label class="form-label" for="identifiant">Identifiant</label>
+        <input class="form-input" type="text" id="identifiant" placeholder="ex: chambre-01, jean.dupont..." autocomplete="off" required>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label class="form-label" for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <input class="form-input" type="password" id="password" placeholder="Minimum 6 caractères" autocomplete="new-password" required oninput="checkStrength(this.value)">
+          <button type="button" class="toggle-pw" onclick="togglePw()">👁</button>
+        </div>
+        <div class="pw-strength"><div class="pw-bar" id="pw-bar"></div></div>
+        <div class="pw-hint" id="pw-hint">—</div>
+      </div>
+
+      <!-- Numéro de chambre -->
+      <div class="form-group">
+        <label class="form-label">Numéro de chambre</label>
+        <div class="room-grid" id="room-grid">
+          <!-- Généré dynamiquement -->
+          <div class="room-item" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:11px">Chargement...</div>
+        </div>
+        <input type="hidden" id="room" required>
+      </div>
+
+      <!-- Pack -->
+      <div class="form-group">
+        <label class="form-label">Pack souhaité</label>
+        <div class="pack-grid" id="pack-grid">
+          <div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:16px">Chargement des packs...</div>
+        </div>
+        <input type="hidden" id="packId" required>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Submit -->
+      <button type="submit" class="btn-submit" id="btn-submit">
+        <span class="spinner" id="spinner"></span>
+        Créer mon abonnement
+      </button>
+
+    </form>
+
+    <!-- Écran succès -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Abonnement créé !</div>
+      <div class="success-sub">Votre abonnement a bien été enregistré.<br>Vous pouvez maintenant accéder à vos chaînes TV.</div>
+      <div class="success-info" id="success-info"></div>
+      <button class="btn-submit" onclick="resetForm()" style="margin-top:0">Créer un autre abonnement</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-link">
+  <a href="/admin.html">← Retour au dashboard admin</a>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const BASE = '';
+let selectedPack = null;
+let selectedRoom = null;
+
+// ── Chargement des packs disponibles ─────────────────────────
+async function loadPacks() {
+  try {
+    const r = await fetch(`${BASE}/admin/packs`);
+    const packs = await r.json();
+    const grid = document.getElementById('pack-grid');
+
+    if (!packs.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:16px">Aucun pack disponible</div>';
+      return;
+    }
+
+    grid.innerHTML = packs.map(p => `
+      <div class="pack-item" data-id="${p.id}" onclick="selectPack('${p.id}', this)">
+        <div class="pack-dot" style="background:${p.couleur||'#6b7080'}"></div>
+        <div style="flex:1">
+          <div class="pack-name">${p.nom}</div>
+          <div class="pack-count">${p.chaines.length} chaîne${p.chaines.length>1?'s':''}</div>
+        </div>
+        <div class="pack-check"></div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('pack-grid').innerHTML =
+      '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;padding:16px">Erreur chargement packs</div>';
+  }
+}
+
+// ── Chargement des chambres disponibles ──────────────────────
+async function loadRooms() {
+  try {
+    const r = await fetch(`${BASE}/admin/clients`);
+    const clients = await r.json();
+    const occupees = new Set(clients.map(c => c.room));
+
+    // Chambres 01 à 20 — adapter selon l'hôtel
+    const toutes = Array.from({length:20}, (_,i) => String(i+1).padStart(2,'0'));
+    const libres = toutes.filter(r => !occupees.has(r));
+
+    const grid = document.getElementById('room-grid');
+
+    if (!libres.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;padding:16px">Toutes les chambres sont occupées</div>';
+      return;
+    }
+
+    grid.innerHTML = libres.map(r =>
+      `<div class="room-item" onclick="selectRoom('${r}', this)">${r}</div>`
+    ).join('');
+
+  } catch(e) {
+    // Fallback : saisie libre
+    document.getElementById('room-grid').outerHTML =
+      '<input class="form-input" type="text" id="room" placeholder="Numéro de chambre" required>';
+  }
+}
+
+// ── Sélection pack ────────────────────────────────────────────
+function selectPack(id, el) {
+  document.querySelectorAll('.pack-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPack = id;
+  document.getElementById('packId').value = id;
+}
+
+// ── Sélection chambre ─────────────────────────────────────────
+function selectRoom(r, el) {
+  document.querySelectorAll('.room-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRoom = r;
+  document.getElementById('room').value = r;
+}
+
+// ── Force du mot de passe ─────────────────────────────────────
+function checkStrength(val) {
+  const bar  = document.getElementById('pw-bar');
+  const hint = document.getElementById('pw-hint');
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { w:'0%',   bg:'transparent', label:'—' },
+    { w:'25%',  bg:'var(--red)',   label:'Trop court' },
+    { w:'50%',  bg:'var(--amber)', label:'Faible' },
+    { w:'75%',  bg:'var(--amber)', label:'Moyen' },
+    { w:'90%',  bg:'var(--green)', label:'Fort' },
+    { w:'100%', bg:'var(--green)', label:'Très fort ✓' },
+  ];
+  const lv = levels[Math.min(score, 5)];
+  bar.style.width = lv.w;
+  bar.style.background = lv.bg;
+  hint.textContent = lv.label;
+  hint.style.color = lv.bg;
+}
+
+// ── Toggle visibilité mot de passe ────────────────────────────
+function togglePw() {
+  const inp = document.getElementById('password');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ── Affichage message ─────────────────────────────────────────
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = `msg ${type}`;
+  el.style.display = 'block';
+  setTimeout(() => { if(el.textContent===text) el.style.display='none'; }, 5000);
+}
+
+// ── Soumission formulaire ─────────────────────────────────────
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const identifiant = document.getElementById('identifiant').value.trim();
+  const password    = document.getElementById('password').value;
+  const room        = document.getElementById('room').value;
+  const packId      = document.getElementById('packId').value;
+
+  // Validations côté client
+  if (!identifiant) return showMsg('L\'identifiant est obligatoire', 'error');
+  if (identifiant.length < 3) return showMsg('L\'identifiant doit contenir au moins 3 caractères', 'error');
+  if (!password || password.length < 6) return showMsg('Le mot de passe doit contenir au moins 6 caractères', 'error');
+  if (!room) return showMsg('Veuillez sélectionner un numéro de chambre', 'error');
+  if (!packId) return showMsg('Veuillez sélectionner un pack', 'error');
+
+  // UI loading
+  const btn     = document.getElementById('btn-submit');
+  const spinner = document.getElementById('spinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+
+  try {
+    const r = await fetch(`${BASE}/register`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ identifiant, password, room, packId }),
+    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      showMsg(data.error || 'Erreur lors de l\'inscription', 'error');
+      return;
+    }
+
+    // Succès — affiche l'écran de confirmation
+    document.getElementById('form').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    document.getElementById('success-info').innerHTML = `
+      <div class="success-info-row"><span>Identifiant</span><span>${identifiant}</span></div>
+      <div class="success-info-row"><span>Chambre</span><span>${room}</span></div>
+      <div class="success-info-row"><span>Pack souscrit</span><span>${data.pack || packId}</span></div>
+      <div class="success-info-row"><span>Chaînes accessibles</span><span>${data.channelCount || '—'}</span></div>
+    `;
+
+  } catch(err) {
+    showMsg('Impossible de contacter le serveur', 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+});
+
+// ── Reset formulaire ──────────────────────────────────────────
+function resetForm() {
+  document.getElementById('form').reset();
+  document.getElementById('form').style.display = 'block';
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('msg').style.display = 'none';
+  document.getElementById('pw-bar').style.width = '0';
+  document.getElementById('pw-hint').textContent = '—';
+  selectedPack = null;
+  selectedRoom = null;
+  document.querySelectorAll('.pack-item').forEach(i => i.classList.remove('selected'));
+  document.querySelectorAll('.room-item').forEach(i => i.classList.remove('selected'));
+}
+
+// ── Init ──────────────────────────────────────────────────────
+loadPacks();
+loadRooms();
+</script>
+</body>
+</html>

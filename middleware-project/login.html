@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPTV Admin — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0e14;--bg2:#13161f;--bg3:#1a1e2a;
+  --border:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.14);
+  --text:#e8eaf2;--muted:#6b7080;
+  --accent:#4f6ef7;--green:#22d3a0;--red:#f43f5e;
+  --mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(79,110,247,.03)1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,110,247,.03)1px,transparent 1px);
+  background-size:40px 40px}
+
+/* Déco arrière-plan */
+.blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.12;pointer-events:none}
+.blob-1{width:400px;height:400px;background:var(--accent);top:-100px;left:-100px}
+.blob-2{width:300px;height:300px;background:#7c3aed;bottom:-80px;right:-60px}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:400px;overflow:hidden;position:relative;z-index:1;
+  box-shadow:0 32px 80px rgba(0,0,0,.5)}
+
+/* Header */
+.card-header{padding:32px 36px 28px;text-align:center;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(79,110,247,.07),transparent)}
+.logo-icon{width:56px;height:56px;border-radius:14px;
+  background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin:0 auto 16px}
+.card-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.card-title span{color:var(--accent)}
+.card-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* Body */
+.card-body{padding:28px 36px 32px}
+
+/* Form */
+.form-group{margin-bottom:18px}
+.form-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:14px;padding:12px 14px;
+  border-radius:8px;outline:none;transition:border-color .15s,box-shadow .15s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+.form-input::placeholder{color:var(--muted)}
+.input-wrap{position:relative}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px}
+.toggle-pw:hover{color:var(--text)}
+
+/* Erreur */
+.msg-error{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);
+  color:var(--red);font-family:var(--mono);font-size:11px;padding:11px 14px;
+  border-radius:7px;margin-bottom:18px;display:none;line-height:1.5}
+
+/* Tentatives */
+.attempts-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+  color:#f59e0b;font-family:var(--mono);font-size:11px;padding:10px 14px;
+  border-radius:7px;margin-bottom:18px;display:none}
+
+/* Submit */
+.btn-submit{width:100%;background:var(--accent);color:#fff;border:none;
+  font-family:var(--sans);font-size:14px;font-weight:700;padding:13px;
+  border-radius:8px;cursor:pointer;transition:all .15s;margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:hover:not(:disabled){background:#3a5af0;transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Spinner */
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.card-footer{padding:14px 36px;border-top:1px solid var(--border);
+  background:rgba(255,255,255,.015);display:flex;align-items:center;
+  justify-content:space-between}
+.footer-badge{font-family:var(--mono);font-size:10px;color:var(--muted);
+  display:flex;align-items:center;gap:6px}
+.footer-dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,211,160,.4)}
+  50%{box-shadow:0 0 0 4px rgba(34,211,160,0)}}
+.footer-link{font-family:var(--mono);font-size:10px;color:var(--muted);
+  text-decoration:none;transition:color .15s}
+.footer-link:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo-icon">⚙</div>
+    <div class="card-title">IPTV <span>Admin</span></div>
+    <div class="card-sub">Accès réservé aux administrateurs</div>
+  </div>
+
+  <div class="card-body">
+    <div class="msg-error" id="msg-error"></div>
+    <div class="attempts-warn" id="attempts-warn"></div>
+
+    <div class="form-group">
+      <label class="form-label">Identifiant</label>
+      <input class="form-input" type="text" id="username"
+        placeholder="admin" autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <div class="input-wrap">
+        <input class="form-input" type="password" id="password"
+          placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="toggle-pw" onclick="togglePw()">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btn" onclick="doLogin()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-text">Accéder au dashboard</span>
+    </button>
+  </div>
+
+  <div class="card-footer">
+    <div class="footer-badge">
+      <span class="footer-dot"></span>
+      Serveur en ligne
+    </div>
+    <a class="footer-link" href="/pageAbonnee.html">→ Espace abonnés</a>
+  </div>
+</div>
+
+<script>
+let attempts = 0;
+const MAX_ATTEMPTS = 5;
+
+function togglePw() {
+  const i = document.getElementById('password');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+function showError(text) {
+  const el = document.getElementById('msg-error');
+  el.textContent = text;
+  el.style.display = 'block';
+  // Shake animation
+  el.style.animation = 'none';
+  setTimeout(() => el.style.animation = '', 10);
+}
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    return showError('Identifiant et mot de passe requis');
+  }
+
+  // Bloquer après trop de tentatives
+  if (attempts >= MAX_ATTEMPTS) {
+    return showError('Trop de tentatives. Veuillez patienter.');
+  }
+
+  const btn     = document.getElementById('btn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btn-text');
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  btnText.textContent = 'Vérification...';
+  document.getElementById('msg-error').style.display = 'none';
+
+  try {
+    const r = await fetch('/admin/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ username, password }),
+    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      attempts++;
+      const restants = MAX_ATTEMPTS - attempts;
+      if (restants <= 2 && restants > 0) {
+        const warn = document.getElementById('attempts-warn');
+        warn.textContent = `⚠ Attention : ${restants} tentative${restants>1?'s':''} restante${restants>1?'s':''}`;
+        warn.style.display = 'block';
+      }
+      if (attempts >= MAX_ATTEMPTS) {
+        showError('Trop de tentatives échouées. Actualisez la page pour réessayer.');
+        btn.disabled = true;
+        return;
+      }
+      return showError(data.error || 'Identifiant ou mot de passe incorrect');
+    }
+
+    // Succès — stocke le token en sessionStorage et redirige
+    sessionStorage.setItem('admin_token', data.token);
+    sessionStorage.setItem('admin_user',  username);
+    btnText.textContent = '✓ Redirection...';
+    window.location.href = '/admin.html';
+
+  } catch (e) {
+    showError('Impossible de contacter le serveur');
+  } finally {
+    if (attempts < MAX_ATTEMPTS) {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      if (btnText.textContent === 'Vérification...') {
+        btnText.textContent = 'Accéder au dashboard';
+      }
+    }
+  }
+}
+
+// Touche Entrée
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Redirige si déjà connecté
+const token = sessionStorage.getItem('admin_token');
+if (token) {
+  // Vérifie si le token est encore valide
+  fetch('/admin/auth/verify', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(r => {
+    if (r.ok) window.location.href = '/admin.html';
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>

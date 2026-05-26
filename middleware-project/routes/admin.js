@@ -9,13 +9,13 @@ const { execSync } = require("child_process");
 const CLIENTS_PATH = path.join(__dirname, "../Data/CLIENTS.json");
 const CHAINES_PATH = path.join(__dirname, "../Data/CHAINES.json");
 
-// ── Helpers JSON ────────────────────────────────────────────────
+// ── Helpers JSON -------------------------------------------------------------------------------------------------
 function readClients() { return JSON.parse(fs.readFileSync(CLIENTS_PATH, "utf8")); }
 function writeClients(d) { fs.writeFileSync(CLIENTS_PATH, JSON.stringify(d, null, 2), "utf8"); }
 function readChaines() { return JSON.parse(fs.readFileSync(CHAINES_PATH, "utf8")); }
 function writeChaines(d) { fs.writeFileSync(CHAINES_PATH, JSON.stringify(d, null, 2), "utf8"); }
 
-// ── Résolution : chaînes effectives d'un client ─────────────────
+// ── Résolution : chaînes effectives d'un client --------------------------------------------------------------------
 // = union(chaînes de chaque pack souscrit) + subscriptions à-la-carte
 function resolveChannels(client, chainesJson) {
   const allChannels   = chainesJson.data  || [];
@@ -33,7 +33,7 @@ function resolveChannels(client, chainesJson) {
   return allChannels.filter(ch => allNames.has(ch.name));
 }
 
-// ── Logs circulaires ─────────────────────────────────────────────
+// ── Logs circulaires ------------------------------------------------------------------------------------------
 const serverLogs = [];
 function pushLog(level, message) {
   serverLogs.unshift({ time: new Date().toLocaleTimeString("fr-FR"), level, message });
@@ -42,12 +42,14 @@ function pushLog(level, message) {
 }
 router.pushLog = pushLog;
 
-// ── SSE ──────────────────────────────────────────────────────────
+// ── SSE ---------------------------------------------------------------------------------------------
 const sseClients = new Set();
 function broadcastSSE(event) {
   const data = "data: " + JSON.stringify(event) + "\n\n";
   sseClients.forEach(res => { try { res.write(data); } catch (_) { sseClients.delete(res); } });
 }
+// Exposé pour que subscriptions.js puisse notifier le dashboard
+router.broadcastSSE = broadcastSSE;
 setInterval(() => broadcastSSE({ type: "status", payload: buildStatus() }), 3000);
 
 router.get("/stream", (req, res) => {
@@ -64,7 +66,7 @@ router.get("/stream", (req, res) => {
   req.on("close", () => sseClients.delete(res));
 });
 
-// ── Status système ────────────────────────────────────────────────
+// ── Status système ...................................!....................................................
 function buildStatus() {
   const mem = process.memoryUsage();
   const pm2 = !!process.env.pm_id;
@@ -87,7 +89,7 @@ function buildStatus() {
 
 router.get("/status", (req, res) => res.json(buildStatus()));
 
-// ── CLIENTS ───────────────────────────────────────────────────────
+// ── CLIENTS ----------------------------------------------------------------------------------------------------------------
 router.get("/clients", (req, res) => {
   try { res.json(readClients()); } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -143,12 +145,12 @@ router.get("/clients/:stbId/channels", (req, res) => {
   res.json({ stb_id: client.stb_id, room: client.room, packs: client.packs, subscriptions: client.subscriptions, channels: resolved });
 });
 
-// ── CHAINES ───────────────────────────────────────────────────────
+// ── CHAINES -----------------------------------------------------------------------------------------------------
 router.get("/chaines", (req, res) => {
   try { res.json(readChaines()); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── PACKS ─────────────────────────────────────────────────────────
+// ── PACKS------------------------------------------------------------------------------------------------------
 router.get("/packs", (req, res) => {
   try { res.json(readChaines().packs || []); } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -203,23 +205,80 @@ router.delete("/packs/:packId", (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Sync streamer → POST /admin/chaines/sync ─────────────────────
+// ── Sync streamer → POST /admin/chaines/sync-------------------------------------------------------------
+// Les chaînes déjà connues conservent leur pack.
+// Les nouvelles chaînes sont automatiquement placées dans le pack "nouveautes". Et si le client veut changer son abonnement il peut ajouter les nouvelles chaines a la carte
+// Le pack "Nouveautés" est créé automatiquement s'il n'existe pas.
 router.post("/chaines/sync", (req, res) => {
   const { data } = req.body;
   if (!Array.isArray(data)) return res.status(400).json({ error: "data[] requis" });
-  const json = readChaines();
+
+  const json      = readChaines();
+  const existing  = json.data  || [];
+  const packs     = json.packs || [];
+
+  // Crée le pack "Nouveautés" s'il n'existe pas encore
+  const NOUVEAUTES_ID = "nouveautes";
+  if (!packs.find(p => p.id === NOUVEAUTES_ID)) {
+    packs.push({
+      id:          NOUVEAUTES_ID,
+      nom:         "Nouveautés",
+      description: "Chaînes récemment détectées par le streamer",
+      couleur:     "#22d3a0",
+      chaines:     []
+    });
+    pushLog("ok", "Pack Nouveautés créé automatiquement");
+  }
+
+  const nouveautePack = packs.find(p => p.id === NOUVEAUTES_ID);
+  const newChannelNames = [];
+
+  // Mappe les chaînes reçues
   json.data = data.map(inc => {
-    const ex = (json.data || []).find(c => c.id === inc.id);
-    return { ...inc, pack: ex ? ex.pack : "divertissement" };
+    const ex = existing.find(c => c.id === inc.id);
+    if (ex) {
+      // Chaîne déjà connue → conserve son pack
+      return { ...inc, pack: ex.pack };
+    } else {
+      // Nouvelle chaîne → pack "nouveautes"
+      newChannelNames.push(inc.name);
+      return { ...inc, pack: NOUVEAUTES_ID };
+    }
   });
+
+  // Met à jour la liste des chaînes dans le pack Nouveautés
+  // (ajoute les nouvelles, retire celles qui ne sont plus diffusées)
+  const allNewIds = new Set(data.map(c => c.id));
+  nouveautePack.chaines = [
+    // Garde les anciennes nouveautés encore diffusées
+    ...nouveautePack.chaines.filter(name =>
+      json.data.find(ch => ch.name === name && ch.pack === NOUVEAUTES_ID)
+    ),
+    // Ajoute les vraiment nouvelles
+    ...newChannelNames.filter(n => !nouveautePack.chaines.includes(n))
+  ];
+
+  json.packs = packs;
   json.count = json.data.length;
+
   writeChaines(json);
-  pushLog("ok", `Sync streamer · ${json.data.length} chaînes`);
+
+  if (newChannelNames.length > 0) {
+    pushLog("ok", `Sync streamer · ${json.data.length} chaînes · ${newChannelNames.length} nouvelle(s) → Nouveautés : ${newChannelNames.join(", ")}`);
+  } else {
+    pushLog("ok", `Sync streamer · ${json.data.length} chaînes · aucune nouveauté`);
+  }
+
   broadcastSSE({ type: "chaines", payload: json });
-  res.json({ ok: true, count: json.data.length });
+  res.json({
+    ok:           true,
+    count:        json.data.length,
+    newChannels:  newChannelNames.length,
+    newNames:     newChannelNames
+  });
 });
 
-// ── Logs + redémarrage ────────────────────────────────────────────
+// ── Logs + redémarrage ------------------------------------------------------------------------------------
 router.get("/logs", (req, res) => res.json(serverLogs));
 
 router.post("/restart", (req, res) => {
@@ -233,3 +292,18 @@ router.post("/restart", (req, res) => {
 });
 
 module.exports = router;
+
+// Pour que les clients ( stb puisse se connecter et choisisr ses abonnement)
+router.post("/register", (req, res) => {
+  const { identifiant, password, packId } = req.body;
+  // Crée l'abonné dans CLIENTS.json
+  // Hash le mot de passe avant de le stocker
+  // Broadcast SSE au dashboard
+});
+// Pour que l'admin  puisse se connecter sur le dashboardadministrateur
+
+router.post("/login", (req, res) => {
+  const { identifiant, password } = req.body;
+  // Vérifie le hash bcrypt
+  // Retourne la liste des chaînes si OK
+});

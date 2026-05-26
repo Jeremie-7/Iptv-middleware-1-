@@ -1,0 +1,1 @@
+l'application python a la meme fonction que la STB (client). Un client peut visualiser ses droits d'abonnements (les changer aussi) en s'identifiant sur l'application bureau (client python). Mon role en tant que middleware est de lui transmettre sa liste d'abonnements etc (tout comme avec la STB ) comment faire ?

@@ -27,7 +27,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,211,160,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(34,211,160,0)}}
 nav{padding:16px 0;flex:1}
 .nav-section{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:12px 20px 6px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s;} /*user-select:none*/
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(79,110,247,.08)}
 .nav-icon{font-size:15px}
@@ -135,7 +135,7 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 .ch-cb-item.checked{border-color:rgba(79,110,247,.4);background:rgba(79,110,247,.08);color:var(--accent)}
 .ch-cb-item input{display:none}
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
 .overlay.open{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--bh);border-radius:12px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:28px;animation:slideUp .2s ease}
 .modal::-webkit-scrollbar{width:4px} .modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -169,6 +169,10 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 .pack-cb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .pack-cb-name{font-size:12px;font-weight:700;flex:1}
 .pack-cb-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
+/* TABS */
+.tab-btn{font-family:var(--mono);font-size:11px;padding:7px 16px;background:transparent;border:none;color:var(--muted);border-radius:6px;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.tab-btn:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.tab-btn.active{background:var(--bg3);color:var(--accent);border:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -182,14 +186,17 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
     <div class="nav-section">Navigation</div>
     <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">◈</span> Dashboard</div>
     <div class="nav-item" onclick="nav('packs')"><span class="nav-icon">◉</span> Packs</div>
-    <div class="nav-item" onclick="nav('abonnes')"><span class="nav-icon">◎</span> Abonnés</div>
+    <div class="nav-item" onclick="nav('abonnes')"><span class="nav-icon">◎</span> STB & Abonnés</div>
     <div class="nav-item" onclick="nav('chaines')"><span class="nav-icon">▣</span> Chaînes</div>
-    <div class="nav-item" onclick="nav('stb')"><span class="nav-icon">⬡</span> STB</div>
     <div class="nav-section">Système</div>
     <div class="nav-item" onclick="nav('systeme')"><span class="nav-icon">⚙</span> Système</div>
     <div class="nav-item" onclick="nav('logs')"><span class="nav-icon">≡</span> Journal</div>
+    <div class="nav-item" onclick="doLogout()" style="color:var(--red);margin-top:auto"><span class="nav-icon">⏻</span> Déconnexion</div>
   </nav>
-  <div class="sidebar-footer">v3.0 · Lycée Newton<br><span id="clock">--:--:--</span></div>
+  <div class="sidebar-footer">
+    <div style="margin-bottom:4px">👤 <span id="admin-user" style="color:var(--accent)">admin</span></div>
+    v3.0 · Lycée Newton<br><span id="clock">--:--:--</span>
+  </div>
 </aside>
 
 <main class="main">
@@ -226,58 +233,114 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 <div id="page-packs" class="page">
   <div class="topbar">
     <div class="page-title">Packs <span>·</span> Gestion</div>
-    <button class="btn ac" onclick="openPackModal()">+ Créer un pack</button>
+    <div class="topbar-actions">
+      <span class="badge bp" id="packs-cnt-top">0 packs</span>
+      <button class="btn ac" onclick="openPackModal()">+ Créer un pack</button>
+    </div>
   </div>
-  <div class="grid-3" id="packs-grid"><div class="empty" style="grid-column:1/-1">Connexion SSE...</div></div>
+  <div id="packs-grid" class="grid-3"><div class="empty" style="grid-column:1/-1">Connexion SSE...</div></div>
 </div>
 
-<!-- ═══ ABONNÉS ═══ -->
+<!-- ═══ STB & ABONNÉS (page fusionnée) ═══ -->
 <div id="page-abonnes" class="page">
   <div class="topbar">
-    <div class="page-title">Abonnés <span>·</span> Gestion</div>
-    <button class="btn ac" onclick="openAddModal()">+ Ajouter</button>
-  </div>
-  <div class="search-bar"><input class="sinput" type="text" placeholder="Rechercher par chambre ou STB ID..." oninput="filterAb(this.value)"></div>
-  <div class="grid-2">
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Liste des abonnés</div><span class="badge bam" id="ab-cnt">0</span></div>
-      <div class="panel-body"><table>
-        <thead><tr><th>STB ID</th><th>Chambre</th><th>Packs</th><th>À-la-carte</th><th>Action</th></tr></thead>
-        <tbody id="ab-body"><tr><td colspan="5" class="empty">Connexion SSE...</td></tr></tbody>
-      </table></div>
+    <div class="page-title">STB <span>·</span> Abonnés</div>
+    <div class="topbar-actions">
+      <span class="badge bam" id="ab-cnt">0</span>
+      <button class="btn ac" onclick="openAddModal()">+ Nouvel abonné</button>
     </div>
+  </div>
+
+  <!-- Onglets internes -->
+  <div style="display:flex;gap:2px;margin-bottom:20px;background:var(--bg2);padding:4px;border-radius:8px;width:fit-content;border:1px solid var(--border)">
+    <button id="tab-btn-liste" class="tab-btn active" onclick="switchTab('liste')">◎ Liste abonnés</button>
+    <button id="tab-btn-stb"   class="tab-btn"        onclick="switchTab('stb')">⬡ Vue STB</button>
+  </div>
+
+  <!-- TAB : LISTE ABONNÉS -->
+  <div id="tab-liste">
+    <div class="search-bar">
+      <input class="sinput" type="text" id="ab-search" placeholder="Rechercher par chambre ou STB ID..." oninput="filterAb(this.value)">
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Liste des abonnés</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="badge bam" id="ab-sel-count" style="display:none">0 sélectionné(s)</span>
+            <button class="btn rd" id="btn-del-selected" style="display:none" onclick="delSelected()">✕ Supprimer la sélection</button>
+          </div>
+        </div>
+        <div class="panel-body"><table>
+          <thead><tr>
+            <th style="width:36px;padding:10px 12px"><input type="checkbox" id="cb-all" onchange="toggleAll(this.checked)" style="cursor:pointer;accent-color:var(--accent)"></th>
+            <th>STB ID</th><th>Chambre</th><th>Packs</th><th>Chaînes</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="ab-body"><tr><td colspan="6" class="empty">Connexion SSE...</td></tr></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="gap:8px">
+          <div class="panel-title" id="ab-edit-title">Modifier abonné</div>
+          <div id="ab-edit-actions" style="display:none;gap:6px;flex-shrink:0">
+            <button class="btn rd" onclick="delCurrentAb()">✕ Supprimer cet abonné</button>
+          </div>
+        </div>
+        <div id="ab-edit"><div class="empty" style="padding:48px 20px">← Cliquez sur un abonné<br>pour l'éditer</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB : VUE STB -->
+  <div id="tab-stb" style="display:none">
     <div class="panel">
-      <div class="panel-header"><div class="panel-title">Modifier abonné</div></div>
-      <div id="ab-edit"><div class="empty">Cliquez sur un abonné</div></div>
+      <div class="panel-header">
+        <div class="panel-title">Set-Top Boxes enregistrées</div>
+        <span class="badge bm" id="stb-cnt">0 STB</span>
+      </div>
+      <div class="panel-body"><table>
+        <thead><tr><th>STB ID</th><th>Chambre</th><th>Statut</th><th>Packs</th><th>Chaînes accessibles</th><th>Actions</th></tr></thead>
+        <tbody id="stb-body"><tr><td colspan="6" class="empty">Connexion SSE...</td></tr></tbody>
+      </table></div>
     </div>
   </div>
 </div>
-
-<!-- ═══ CHAÎNES ═══ -->
 <div id="page-chaines" class="page">
-  <div class="topbar"><div class="page-title">Chaînes <span>·</span> Catalogue</div></div>
+  <div class="topbar">
+    <div class="page-title">Chaînes <span>·</span> Catalogue</div>
+    <div class="topbar-actions">
+      <span id="streamer-status" class="badge bm">Streamer —</span>
+      <span id="ch-nouveautes-badge" class="badge bg" style="display:none">0 nouveauté(s)</span>
+    </div>
+  </div>
+
+  <!-- Bandeau Nouveautés (visible uniquement s'il y a des nouveautés) -->
+  <div id="nouveautes-banner" style="display:none;margin-bottom:16px;padding:14px 20px;background:rgba(34,211,160,.06);border:1px solid rgba(34,211,160,.2);border-radius:10px;display:none;align-items:center;gap:14px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0"></div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:3px">Nouvelles chaînes détectées par le streamer</div>
+      <div id="nouveautes-list" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></div>
+    </div>
+    <button class="btn" style="color:var(--green);border-color:rgba(34,211,160,.3)" onclick="filterPack('nouveautes');document.getElementById('pack-sel').value='nouveautes'">Voir les nouveautés</button>
+  </div>
+
   <div class="search-bar">
     <input class="sinput" type="text" placeholder="Rechercher une chaîne..." oninput="filterCh(this.value)">
     <select class="sinput" style="flex:0;width:180px" onchange="filterPack(this.value)" id="pack-sel"><option value="">Tous les packs</option></select>
     <select class="sinput" style="flex:0;width:140px" onchange="filterMux(this.value)" id="mux-sel"><option value="">Tous les multiplex</option></select>
   </div>
+
   <div class="panel">
-    <div class="panel-header"><div class="panel-title">Catalogue IPTV</div><span class="badge bc" id="ch-cnt">0 chaînes</span></div>
+    <div class="panel-header">
+      <div class="panel-title">Catalogue IPTV — chaînes diffusées en direct</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="badge bc" id="ch-cnt">0 chaînes</span>
+        <span id="last-sync-label" style="font-family:var(--mono);font-size:10px;color:var(--muted)">Jamais synchronisé</span>
+      </div>
+    </div>
     <div class="panel-body"><table>
       <thead><tr><th>#ID</th><th>Nom</th><th>Pack</th><th>Multiplex</th><th>Fréquence</th><th>URL Multicast</th></tr></thead>
       <tbody id="ch-body"><tr><td colspan="6" class="empty">Connexion SSE...</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- ═══ STB ═══ -->
-<div id="page-stb" class="page">
-  <div class="topbar"><div class="page-title">STB <span>·</span> Boîtiers</div><span class="badge bm" id="stb-cnt">0 STB</span></div>
-  <div class="panel">
-    <div class="panel-header"><div class="panel-title">Set-Top Boxes enregistrées</div><span class="badge bm">Live · CLIENTS.json</span></div>
-    <div class="panel-body"><table>
-      <thead><tr><th>STB ID</th><th>Chambre</th><th>Packs</th><th>Chaînes accessibles</th><th>Actions</th></tr></thead>
-      <tbody id="stb-body"><tr><td colspan="5" class="empty">Connexion SSE...</td></tr></tbody>
     </table></div>
   </div>
 </div>
@@ -353,17 +416,27 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 <div class="overlay" id="modal-add">
   <div class="modal">
     <div class="modal-title">Ajouter un abonné</div>
-    <div class="fg"><label class="flabel">STB ID</label><input class="finput" id="f-stbid" placeholder="stb-03"></div>
-    <div class="fg"><label class="flabel">Chambre</label><input class="finput" id="f-room" placeholder="03"></div>
+    <div id="add-form-error" style="font-family:var(--mono);font-size:12px;color:var(--red);background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);border-radius:6px;padding:8px 12px;margin-bottom:14px;display:block;min-height:0"></div>
     <div class="fg">
-      <label class="flabel">Packs souscrits</label>
+      <label class="flabel">STB ID <span style="color:var(--muted)">(format : stb-01, stb-02...)</span></label>
+      <input class="finput" id="f-stbid" placeholder="stb-03" oninput="this.style.borderColor='';document.getElementById('add-form-error').textContent=''">
+    </div>
+    <div class="fg">
+      <label class="flabel">Numéro de chambre</label>
+      <input class="finput" id="f-room" placeholder="03" oninput="this.style.borderColor='';document.getElementById('add-form-error').textContent=''">
+    </div>
+    <div class="fg">
+      <label class="flabel">Packs souscrits <span style="color:var(--muted)">(optionnel)</span></label>
       <div class="pack-checkbox-grid" id="add-pack-grid"></div>
     </div>
     <div class="fg">
-      <label class="flabel">Chaînes à-la-carte (en supplément des packs)</label>
+      <label class="flabel">Chaînes à-la-carte <span style="color:var(--muted)">(en supplément des packs)</span></label>
       <div class="ch-checkbox-grid" id="add-alacarte-grid"></div>
     </div>
-    <div class="modal-actions"><button class="btn" onclick="closeAdd()">Annuler</button><button class="btn ac" onclick="submitAdd()">Ajouter</button></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAdd()">Annuler</button>
+      <button class="btn ac" onclick="submitAdd()">Ajouter l'abonné</button>
+    </div>
   </div>
 </div>
 
@@ -371,21 +444,42 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 <div class="overlay" id="modal-pack">
   <div class="modal">
     <div class="modal-title" id="pack-modal-title">Créer un pack</div>
-    <div class="fg"><label class="flabel">Identifiant (ex: sport)</label><input class="finput" id="p-id" placeholder="sport"></div>
-    <div class="fg"><label class="flabel">Nom affiché</label><input class="finput" id="p-nom" placeholder="Pack Sport"></div>
-    <div class="fg"><label class="flabel">Description</label><input class="finput" id="p-desc" placeholder="Chaînes sportives"></div>
+    <div id="pack-form-error" style="font-family:var(--mono);font-size:12px;color:var(--red);background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);border-radius:6px;padding:8px 12px;margin-bottom:14px;display:block;min-height:0"></div>
     <div class="fg">
-      <label class="flabel">Couleur (hex)</label>
+      <label class="flabel">Identifiant unique <span style="color:var(--muted)">(minuscules, tirets — ex: pack-sport)</span></label>
+      <input class="finput" id="p-id" placeholder="pack-sport" oninput="this.style.borderColor='';document.getElementById('pack-form-error').textContent=''">
+    </div>
+    <div class="fg">
+      <label class="flabel">Nom affiché</label>
+      <input class="finput" id="p-nom" placeholder="Pack Sport">
+    </div>
+    <div class="fg">
+      <label class="flabel">Description <span style="color:var(--muted)">(optionnel)</span></label>
+      <input class="finput" id="p-desc" placeholder="Chaînes sportives">
+    </div>
+    <div class="fg">
+      <label class="flabel">Couleur d'accentuation</label>
       <div style="display:flex;gap:10px;align-items:center">
         <input class="finput" id="p-couleur" placeholder="#4f6ef7" style="flex:1" oninput="document.getElementById('p-color-preview').style.background=this.value">
         <div id="p-color-preview" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:#4f6ef7;flex-shrink:0"></div>
       </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <span onclick="setPackColor('#4f6ef7')" style="width:20px;height:20px;border-radius:50%;background:#4f6ef7;cursor:pointer;border:2px solid transparent" title="Bleu"></span>
+        <span onclick="setPackColor('#22d3a0')" style="width:20px;height:20px;border-radius:50%;background:#22d3a0;cursor:pointer" title="Vert"></span>
+        <span onclick="setPackColor('#f59e0b')" style="width:20px;height:20px;border-radius:50%;background:#f59e0b;cursor:pointer" title="Ambre"></span>
+        <span onclick="setPackColor('#f43f5e')" style="width:20px;height:20px;border-radius:50%;background:#f43f5e;cursor:pointer" title="Rouge"></span>
+        <span onclick="setPackColor('#06b6d4')" style="width:20px;height:20px;border-radius:50%;background:#06b6d4;cursor:pointer" title="Cyan"></span>
+        <span onclick="setPackColor('#7c3aed')" style="width:20px;height:20px;border-radius:50%;background:#7c3aed;cursor:pointer" title="Violet"></span>
+      </div>
     </div>
     <div class="fg">
-      <label class="flabel">Chaînes du pack</label>
+      <label class="flabel">Chaînes du pack <span style="color:var(--muted)" id="pack-ch-count">(0 sélectionnée)</span></label>
       <div class="ch-checkbox-grid" id="pack-ch-grid"></div>
     </div>
-    <div class="modal-actions"><button class="btn" onclick="closePackModal()">Annuler</button><button class="btn ac" onclick="submitPack()">Enregistrer</button></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closePackModal()">Annuler</button>
+      <button class="btn ac" onclick="submitPack()">Enregistrer</button>
+    </div>
   </div>
 </div>
 
@@ -397,6 +491,8 @@ td{padding:11px 20px;font-size:13px;vertical-align:middle}
 let CLIENTS=[], CHAINES=[], PACKS=[];
 let uiLogs=[], abF='', chF='', chPackF='', chMuxF='', autoscroll=true;
 let editingPackId=null;
+let currentAbId=null;
+let selectedAbs=new Set();
 
 // ── HORLOGE ──────────────────────────────────────────────────────
 setInterval(()=>{ document.getElementById('clock').textContent=new Date().toLocaleTimeString('fr-FR'); },1000);
@@ -406,14 +502,24 @@ function nav(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const map={dashboard:'dashboard',packs:'packs',abonnes:'abonné',chaines:'chaîne',stb:'stb',systeme:'système',logs:'journal'};
+  const map={dashboard:'dashboard',packs:'packs',abonnes:'stb & abonné',chaines:'chaîne',systeme:'système',logs:'journal'};
   document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.toLowerCase().includes(map[id]||id)) n.classList.add('active'); });
+}
+
+// ── ONGLETS internes STB / Abonnés ───────────────────────────────
+function switchTab(tab){
+  document.getElementById('tab-liste').style.display = tab==='liste' ? '' : 'none';
+  document.getElementById('tab-stb').style.display   = tab==='stb'   ? '' : 'none';
+  document.getElementById('tab-btn-liste').classList.toggle('active', tab==='liste');
+  document.getElementById('tab-btn-stb').classList.toggle('active',   tab==='stb');
 }
 
 // ── SSE ──────────────────────────────────────────────────────────
 function connectSSE(){
   const dot=document.getElementById('sse-dot'), lbl=document.getElementById('sse-label');
-  const es=new EventSource('/admin/stream');
+  // Le token est passé en query string car EventSource ne supporte pas les headers custom
+  const tokenParam = ADMIN_TOKEN ? '?token=' + ADMIN_TOKEN : '';
+  const es=new EventSource('/admin/stream' + tokenParam);
   es.onopen=()=>{ dot.className='on'; lbl.textContent='● En direct'; lbl.className='badge bg'; uiLog('ok','Connexion SSE établie'); };
   es.onerror=()=>{ dot.className='err'; lbl.textContent='○ Déconnecté'; lbl.className='badge br'; uiLog('err','SSE perdu — reconnexion...'); };
   es.onmessage=e=>handle(JSON.parse(e.data));
@@ -431,6 +537,10 @@ function handle(ev){
     case 'clients': applyClients(ev.payload); uiLog('info','CLIENTS.json mis à jour · '+ev.payload.length+' abonnés'); break;
     case 'chaines': applyChaines(ev.payload); uiLog('info','CHAINES.json mis à jour (packs/chaînes)'); break;
     case 'log':     uiLog(ev.payload.level,ev.payload.message,ev.payload.time); break;
+    case 'access_revoked':
+      // Des chaînes ont été révoquées — log dans le journal
+      uiLog('warn', `Accès révoqué · ${ev.payload.urls.length} flux coupé(s) : ${ev.payload.urls.join(', ')}`);
+      break;
     case 'restarting': showRestartOverlay(); break;
   }
 }
@@ -452,8 +562,38 @@ function applyChaines(json){
   PACKS   = (Array.isArray(json)?[]:(json.packs||[]));
   set('c-ch',CHAINES.length); set('c-packs',PACKS.length);
   set('ch-cnt',CHAINES.length+' chaîne'+(CHAINES.length>1?'s':''));
+  set('packs-cnt-top',PACKS.length+' pack'+(PACKS.length>1?'s':''));
+
+  // Mise à jour statut streamer
+  const streamerBadge = document.getElementById('streamer-status');
+  if(CHAINES.length > 0){
+    const now = new Date().toLocaleTimeString('fr-FR');
+    set('last-sync-label', 'Dernière sync : '+now);
+    if(streamerBadge){ streamerBadge.textContent='● Streamer en ligne'; streamerBadge.className='badge bg'; }
+  } else {
+    if(streamerBadge){ streamerBadge.textContent='○ Aucune chaîne'; streamerBadge.className='badge bm'; }
+  }
+
+  // Bandeau Nouveautés
+  const nouveautesPack = PACKS.find(p=>p.id==='nouveautes');
+  const banner  = document.getElementById('nouveautes-banner');
+  const nbadge  = document.getElementById('ch-nouveautes-badge');
+  const nlist   = document.getElementById('nouveautes-list');
+  if(nouveautesPack && nouveautesPack.chaines.length > 0){
+    if(banner)  { banner.style.display='flex'; }
+    if(nbadge)  { nbadge.style.display=''; nbadge.textContent=nouveautesPack.chaines.length+' nouveauté(s)'; }
+    if(nlist)   { nlist.textContent = nouveautesPack.chaines.join(' · '); }
+  } else {
+    if(banner)  { banner.style.display='none'; }
+    if(nbadge)  { nbadge.style.display='none'; }
+  }
+
   renderPacksBars(); renderPacksPage(); renderChaines(chF,chPackF,chMuxF);
   buildSelects();
+  // Rafraîchit le panneau d'édition abonné si ouvert
+  if(currentAbId && CLIENTS.find(c=>c.stb_id===currentAbId)){
+    showAbEdit(currentAbId);
+  }
 }
 
 function applyClients(data){
@@ -462,6 +602,10 @@ function applyClients(data){
   set('c-ab',CLIENTS.length); set('d-ab-cnt',CLIENTS.length+' abonné'+(CLIENTS.length>1?'s':''));
   set('ab-cnt',CLIENTS.length); set('stb-cnt',CLIENTS.length+' STB');
   renderDashAb(); renderAb(abF); renderSTB();
+  // Rafraîchit le panneau d'édition si un abonné est sélectionné
+  if(currentAbId && CLIENTS.find(c=>c.stb_id===currentAbId)){
+    showAbEdit(currentAbId);
+  }
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────
@@ -500,46 +644,73 @@ function renderDashAb(){
       }).join('');
 }
 
+// Nombre de chaînes d'un pack réellement diffusées par le streamer
+function getLiveCount(pack){
+  return pack.chaines.filter(name=>CHAINES.find(ch=>ch.name===name)).length;
+}
+
 function renderPacksBars(){
   const el=document.getElementById('d-pack-bars');
   set('d-pack-cnt',PACKS.length+' pack'+(PACKS.length>1?'s':''));
   if(!PACKS.length){ el.innerHTML='<div class="empty">Aucun pack défini</div>'; return; }
-  const max=Math.max(...PACKS.map(p=>p.chaines.length),1);
-  el.innerHTML=PACKS.map(p=>`
-    <div class="prog-row">
+  const max=Math.max(...PACKS.map(p=>getLiveCount(p)),1);
+  el.innerHTML=PACKS.map(p=>{
+    const live=getLiveCount(p), total=p.chaines.length;
+    const col=p.couleur||'var(--accent)';
+    return `<div class="prog-row">
       <div class="prog-head">
-        <span class="prog-name" style="color:${p.couleur||'var(--text)'}">${p.nom}</span>
-        <span class="prog-count">${p.chaines.length} chaîne${p.chaines.length>1?'s':''}</span>
+        <span class="prog-name" style="color:${col}">${p.nom}</span>
+        <span class="prog-count" style="color:${live===total&&total>0?'var(--green)':'var(--amber)'}">${live}/${total} diffusée${live>1?'s':''}</span>
       </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:${(p.chaines.length/max*100).toFixed(0)}%;background:${p.couleur||'var(--accent)'}"></div></div>
-    </div>`).join('');
+      <div class="prog-bar"><div class="prog-fill" style="width:${live>0?(live/max*100).toFixed(0):0}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
 }
 
 // ── PAGE PACKS ───────────────────────────────────────────────────
 function renderPacksPage(){
   const grid=document.getElementById('packs-grid');
-  if(!PACKS.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1">Aucun pack défini. Cliquez sur "+ Créer un pack".</div>'; return; }
+  set('packs-cnt-top',PACKS.length+' pack'+(PACKS.length>1?'s':''));
+  if(!PACKS.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:48px">Aucun pack défini.<br><br><button class="btn ac" onclick="openPackModal()">+ Créer le premier pack</button></div>'; return; }
   grid.innerHTML=PACKS.map(p=>{
     const abonnes=CLIENTS.filter(c=>(c.packs||[]).includes(p.id)).length;
-    return `<div class="pack-card">
-      <div class="pack-header">
+    const live=getLiveCount(p), total=p.chaines.length;
+    const pct=total>0?Math.round(live/total*100):0;
+    const col=p.couleur||'#6b7080';
+    return `<div class="pack-card" style="border-color:${col}20">
+      <div class="pack-header" style="border-bottom-color:${col}20">
         <div style="flex:1">
-          <div class="pack-name">${p.nom}</div>
-          <div class="pack-desc">${p.description||''}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div class="pack-color-dot" style="background:${col}"></div>
+            <div class="pack-name" style="color:${col}">${p.nom}</div>
+          </div>
+          <div class="pack-desc">${p.description||'&nbsp;'}</div>
         </div>
-        <div class="pack-color-dot" style="background:${p.couleur||'#6b7080'}"></div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:18px;font-weight:800;color:${col}">${abonnes}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase">abonné${abonnes>1?'s':''}</div>
+        </div>
       </div>
       <div class="pack-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Diffusées</div>
+          <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:${live===total&&total>0?'var(--green)':'var(--amber)'}">
+            ${live}<span style="font-weight:400;color:var(--muted)">/${total}</span>
+          </div>
+        </div>
+        <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:10px">
+          <div style="height:100%;width:${pct}%;background:${live===total&&total>0?'var(--green)':col};border-radius:2px;transition:width .5s"></div>
+        </div>
         <div class="pack-ch-list">
-          ${p.chaines.slice(0,8).map(n=>`<span class="pack-ch-item">${n}</span>`).join('')}
-          ${p.chaines.length>8?`<span class="pack-ch-item" style="color:var(--accent)">+${p.chaines.length-8} autres</span>`:''}
+          ${p.chaines.slice(0,8).map(n=>{
+            const ok=!!CHAINES.find(ch=>ch.name===n);
+            return `<span class="pack-ch-item" style="${ok?'':'opacity:.35;text-decoration:line-through'}" title="${ok?'Diffusée':'Non diffusée'}">${n}</span>`;
+          }).join('')}
+          ${p.chaines.length>8?`<span class="pack-ch-item" style="color:${col}">+${p.chaines.length-8} autres</span>`:''}
         </div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">
-          ${p.chaines.length} chaîne${p.chaines.length>1?'s':''} · ${abonnes} abonné${abonnes>1?'s':''}
-        </div>
-        <div class="pack-footer">
+        <div class="pack-footer" style="border-top-color:${col}15">
           <button class="btn ac" style="flex:1" onclick="editPack('${p.id}')">✎ Modifier</button>
-          <button class="btn rd" onclick="deletePack('${p.id}')">✕</button>
+          <button class="btn rd" onclick="deletePack('${p.id}')" title="Supprimer ce pack">✕</button>
         </div>
       </div>
     </div>`;
@@ -547,26 +718,113 @@ function renderPacksPage(){
 }
 
 // ── PAGE ABONNÉS ─────────────────────────────────────────────────
+// let selectedAbs = new Set();
+// let currentAbId = null;
+
 function renderAb(f=''){
   const list=CLIENTS.filter(c=>!f||c.stb_id.toLowerCase().includes(f.toLowerCase())||c.room.includes(f));
   set('ab-cnt',list.length);
+  // Nettoie la sélection des éléments qui n'existent plus
+  selectedAbs.forEach(id=>{ if(!list.find(c=>c.stb_id===id)) selectedAbs.delete(id); });
+  updateSelectionUI();
+
   document.getElementById('ab-body').innerHTML = list.length===0
-    ? '<tr><td colspan="5" class="empty">Aucun résultat</td></tr>'
-    : list.map(c=>`
-      <tr style="cursor:pointer" onclick="showAbEdit('${c.stb_id}')">
-        <td class="mono">${c.stb_id}</td>
-        <td>Chambre ${c.room}</td>
-        <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
-        <td class="mono" style="color:var(--muted)">${(c.subscriptions||[]).length}</td>
-        <td><button class="btn rd" onclick="event.stopPropagation();delAb('${c.stb_id}')">✕</button></td>
-      </tr>`).join('');
+    ? '<tr><td colspan="6" class="empty">Aucun résultat</td></tr>'
+    : list.map(c=>{
+        const resolved=resolveClientChannels(c);
+        const sel=selectedAbs.has(c.stb_id);
+        const isActive=currentAbId===c.stb_id;
+        return `<tr style="cursor:pointer;${isActive?'background:rgba(79,110,247,.06)':''}" onclick="showAbEdit('${c.stb_id}')">
+          <td style="padding:11px 12px" onclick="event.stopPropagation()">
+            <input type="checkbox" ${sel?'checked':''} style="cursor:pointer;accent-color:var(--accent)"
+              onchange="toggleAbSel('${c.stb_id}',this.checked)">
+          </td>
+          <td class="mono">${c.stb_id}</td>
+          <td>Chambre ${c.room}</td>
+          <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
+          <td class="mono" style="color:var(--green);font-weight:600">${resolved.length}</td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap">
+            <div style="display:flex;gap:6px">
+              <button class="btn ac" style="padding:5px 10px" onclick="showAbEdit('${c.stb_id}')">✎</button>
+              <button class="btn rd" style="padding:5px 10px" onclick="delAb('${c.stb_id}')">✕</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+  // Remet à jour l'état de la checkbox globale
+  const cbAll=document.getElementById('cb-all');
+  if(cbAll){
+    cbAll.checked=list.length>0&&list.every(c=>selectedAbs.has(c.stb_id));
+    cbAll.indeterminate=selectedAbs.size>0&&!cbAll.checked;
+  }
+}
+
+function toggleAbSel(id,checked){
+  if(checked) selectedAbs.add(id); else selectedAbs.delete(id);
+  updateSelectionUI();
+  // Met à jour la checkbox globale
+  const cbAll=document.getElementById('cb-all');
+  if(cbAll){
+    const visible=CLIENTS.filter(c=>!abF||c.stb_id.toLowerCase().includes(abF.toLowerCase())||c.room.includes(abF));
+    cbAll.checked=visible.length>0&&visible.every(c=>selectedAbs.has(c.stb_id));
+    cbAll.indeterminate=selectedAbs.size>0&&!cbAll.checked;
+  }
+}
+
+function toggleAll(checked){
+  const visible=CLIENTS.filter(c=>!abF||c.stb_id.toLowerCase().includes(abF.toLowerCase())||c.room.includes(abF));
+  visible.forEach(c=>{ if(checked) selectedAbs.add(c.stb_id); else selectedAbs.delete(c.stb_id); });
+  renderAb(abF);
+}
+
+function updateSelectionUI(){
+  const n=selectedAbs.size;
+  const btnDel=document.getElementById('btn-del-selected');
+  const selCount=document.getElementById('ab-sel-count');
+  if(btnDel){ btnDel.style.display=n>0?'':'none'; }
+  if(selCount){ selCount.style.display=n>0?'':'none'; selCount.textContent=n+' sélectionné'+(n>1?'s':''); }
+}
+
+async function delSelected(){
+  if(selectedAbs.size===0) return;
+  const ids=[...selectedAbs];
+  if(!confirm(`Supprimer ${ids.length} abonné(s) ?\n${ids.join(', ')}`)) return;
+  let ok=0;
+  for(const id of ids){
+    try{
+      const r=await fetch('/admin/clients/'+id,{method:'DELETE'});
+      if(r.ok){ ok++; selectedAbs.delete(id); }
+    }catch(_){}
+  }
+  notify(`${ok} abonné(s) supprimé(s)`);
+  if(ids.includes(currentAbId)){
+    currentAbId=null;
+    document.getElementById('ab-edit').innerHTML='<div class="empty" style="padding:48px 20px">← Cliquez sur un abonné<br>pour l\'éditer</div>';
+    document.getElementById('ab-edit-actions').style.display='none';
+    set('ab-edit-title','Modifier abonné');
+  }
+}
+
+function delCurrentAb(){
+  if(currentAbId) delAb(currentAbId);
 }
 
 function filterAb(v){ abF=v; renderAb(v); }
 
 function showAbEdit(stbId){
+  currentAbId=stbId;
   const c=CLIENTS.find(x=>x.stb_id===stbId); if(!c) return;
   const resolved=resolveClientChannels(c);
+
+  // Titre panneau + bouton supprimer
+  set('ab-edit-title', stbId+' · chambre '+c.room);
+  const actEl=document.getElementById('ab-edit-actions');
+  if(actEl) actEl.style.display='flex';
+
+  // Met en surbrillance la ligne active
+  renderAb(abF);
+
   const el=document.getElementById('ab-edit');
 
   // Grille packs (checkboxes visuels)
@@ -579,13 +837,13 @@ function showAbEdit(stbId){
     </label>`;
   }).join('');
 
-  // Grille à-la-carte (chaînes hors packs)
+  // Grille à-la-carte
   const fromPackNames=new Set();
   (c.packs||[]).forEach(pid=>{ const pk=getPackById(pid); if(pk) pk.chaines.forEach(n=>fromPackNames.add(n)); });
   const alaCarteGrid=CHAINES.map(ch=>{
     const inPack=fromPackNames.has(ch.name);
     const checked=(c.subscriptions||[]).includes(ch.name);
-    return `<label class="ch-cb-item${checked?' checked':''}${inPack?' disabled':''}" 
+    return `<label class="ch-cb-item${checked?' checked':''}${inPack?' disabled':''}"
       title="${inPack?'Déjà inclus dans un pack':''}"
       onclick="${inPack?'event.preventDefault()':'toggleAbAlaCarte(\''+stbId+'\',\''+ch.name+'\',this)'}">
       <input type="checkbox" ${checked?'checked':''} ${inPack?'disabled':''}>
@@ -595,23 +853,31 @@ function showAbEdit(stbId){
 
   el.innerHTML=`
     <div style="padding:16px 20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div>
-          <div style="font-size:15px;font-weight:700">${c.stb_id}</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Chambre ${c.room} · ${resolved.length} chaînes accessibles</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:rgba(34,211,160,.05);border-radius:8px;border:1px solid rgba(34,211,160,.12)">
+        <div style="flex:1">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Chaînes accessibles</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green)">${resolved.length} <span style="font-size:12px;font-weight:400;color:var(--muted)">chaîne${resolved.length>1?'s':''}</span></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">Packs</div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent)">${(c.packs||[]).length}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">À-la-carte</div>
+          <div style="font-size:16px;font-weight:700;color:var(--amber)">${(c.subscriptions||[]).length}</div>
         </div>
       </div>
       <div class="edit-section">
-        <div class="edit-section-title">Packs souscrits</div>
-        <div class="pack-checkbox-grid">${packGrid||'<div style="color:var(--muted);font-size:12px">Aucun pack défini</div>'}</div>
+        <div class="edit-section-title">Packs souscrits <span style="color:var(--accent)">(cliquer pour activer/désactiver)</span></div>
+        <div class="pack-checkbox-grid">${packGrid||'<div style="color:var(--muted);font-size:12px;padding:8px">Aucun pack — créez-en un d\'abord</div>'}</div>
       </div>
-      <div class="edit-section">
-        <div class="edit-section-title">Chaînes à-la-carte</div>
-        <div class="ch-checkbox-grid">${alaCarteGrid}</div>
+      <div class="edit-section" style="margin-top:14px">
+        <div class="edit-section-title">Chaînes à-la-carte <span style="color:var(--amber)">(en supplément des packs)</span></div>
+        <div class="ch-checkbox-grid">${alaCarteGrid||'<div style="color:var(--muted);font-size:12px">Aucune chaîne disponible</div>'}</div>
       </div>
-      <div style="margin-top:16px;padding:12px;background:rgba(79,110,247,.06);border-radius:8px;border:1px solid rgba(79,110,247,.15)">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Chaînes accessibles (${resolved.length})</div>
-        <div class="tags">${resolved.map(ch=>`<span class="tag">${ch.name}</span>`).join('')||'<span style="color:var(--muted);font-size:11px">Aucune</span>'}</div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(79,110,247,.05);border-radius:7px;border:1px solid rgba(79,110,247,.12)">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Toutes les chaînes accessibles (${resolved.length})</div>
+        <div class="tags">${resolved.map(ch=>`<span class="tag">${ch.name}</span>`).join('')||'<span style="color:var(--muted);font-size:11px">Aucune chaîne</span>'}</div>
       </div>
     </div>`;
 }
@@ -650,13 +916,30 @@ function renderChaines(nf='',pf='',mf=''){
     return okN&&okP&&okM;
   });
   set('ch-cnt',list.length+' chaîne'+(list.length>1?'s':''));
-  document.getElementById('ch-body').innerHTML=list.length===0
-    ? '<tr><td colspan="6" class="empty">Aucune chaîne</td></tr>'
-    : list.map(ch=>{
-        const pk=getPackById(ch.pack||'');
-        const pTag=pk?`<span class="tag-pack" style="background:${pk.couleur||'#6b7080'}18;color:${pk.couleur||'#6b7080'};border-color:${pk.couleur||'#6b7080'}40">${pk.nom}</span>`:`<span style="color:var(--muted);font-size:11px">${ch.pack||'—'}</span>`;
-        return `<tr><td class="mono" style="color:var(--muted)">${ch.id}</td><td><strong>${ch.name}</strong></td><td>${pTag}</td><td><span class="tag-mux">${ch.multiplex}</span></td><td class="mono" style="color:var(--muted)">${ch.frequency}</td><td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">${ch.multicast.url}</td></tr>`;
-      }).join('');
+
+  if(list.length===0){
+    document.getElementById('ch-body').innerHTML=
+      CHAINES.length===0
+        ? '<tr><td colspan="6" class="empty" style="padding:40px">Aucune chaîne — en attente de synchronisation du streamer</td></tr>'
+        : '<tr><td colspan="6" class="empty">Aucune chaîne pour ce filtre</td></tr>';
+    return;
+  }
+
+  document.getElementById('ch-body').innerHTML=list.map(ch=>{
+    const pk=getPackById(ch.pack||'');
+    const isNew=ch.pack==='nouveautes';
+    const pTag=pk
+      ? `<span class="tag-pack" style="background:${pk.couleur||'#6b7080'}18;color:${pk.couleur||'#6b7080'};border-color:${pk.couleur||'#6b7080'}40">${pk.nom}${isNew?' ✦':''}</span>`
+      : `<span style="color:var(--muted);font-size:11px">${ch.pack||'—'}</span>`;
+    return `<tr style="${isNew?'background:rgba(34,211,160,.04)':''}">
+      <td class="mono" style="color:var(--muted)">${ch.id}</td>
+      <td><strong>${ch.name}</strong>${isNew?` <span style="font-family:var(--mono);font-size:9px;padding:1px 5px;background:rgba(34,211,160,.15);color:var(--green);border-radius:3px">NOUVEAU</span>`:''}</td>
+      <td>${pTag}</td>
+      <td><span class="tag-mux">${ch.multiplex}</span></td>
+      <td class="mono" style="color:var(--muted)">${ch.frequency}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">${ch.multicast.url}</td>
+    </tr>`;
+  }).join('');
 }
 
 function buildSelects(){
@@ -677,18 +960,21 @@ function filterCh(v){ chF=v;     renderChaines(v,chPackF,chMuxF); }
 function filterPack(v){ chPackF=v; renderChaines(chF,v,chMuxF); }
 function filterMux(v){ chMuxF=v;  renderChaines(chF,chPackF,v); }
 
-// ── PAGE STB ─────────────────────────────────────────────────────
+// ── PAGE STB (onglet Vue STB) ─────────────────────────────────────
 function renderSTB(){
   document.getElementById('stb-body').innerHTML=CLIENTS.length===0
-    ? '<tr><td colspan="5" class="empty">Aucune STB</td></tr>'
+    ? '<tr><td colspan="6" class="empty">Aucune STB enregistrée</td></tr>'
     : CLIENTS.map(c=>{
         const resolved=resolveClientChannels(c);
         return `<tr>
           <td class="mono">${c.stb_id}</td>
           <td>Chambre ${c.room}</td>
+          <td><span class="sdot"><span class="dot g"></span>Enregistrée</span></td>
           <td><div class="tags">${(c.packs||[]).map(p=>packTagHtml(p)).join('')||'<span style="color:var(--muted);font-size:11px">aucun</span>'}</div></td>
-          <td class="mono" style="color:var(--green)">${resolved.length} chaîne${resolved.length>1?'s':''}</td>
-          <td><button class="btn ac" onclick="nav('abonnes');showAbEdit('${c.stb_id}')">Gérer</button></td>
+          <td class="mono" style="color:var(--green);font-weight:600">${resolved.length} chaîne${resolved.length>1?'s':''}</td>
+          <td>
+            <button class="btn ac" style="padding:5px 10px" onclick="switchTab('liste');showAbEdit('${c.stb_id}')">✎ Gérer</button>
+          </td>
         </tr>`;
       }).join('');
 }
@@ -696,35 +982,95 @@ function renderSTB(){
 // ── MODAL AJOUT ABONNÉ ────────────────────────────────────────────
 function openAddModal(){
   document.getElementById('modal-add').classList.add('open');
-  ['f-stbid','f-room'].forEach(i=>document.getElementById(i).value='');
-  // Packs
+  ['f-stbid','f-room'].forEach(i=>{ const el=document.getElementById(i); if(el){ el.value=''; el.style.borderColor=''; }});
+  document.getElementById('add-form-error').textContent='';
   document.getElementById('add-pack-grid').innerHTML=PACKS.map(p=>`
     <label class="pack-cb-item" onclick="this.classList.toggle('checked')">
       <input type="checkbox" value="${p.id}">
       <div class="pack-cb-dot" style="background:${p.couleur||'#6b7080'}"></div>
       <div style="flex:1"><div class="pack-cb-name">${p.nom}</div><div class="pack-cb-count">${p.chaines.length} chaînes</div></div>
-    </label>`).join('');
-  // À-la-carte
+    </label>`).join('') || '<div style="color:var(--muted);font-size:12px;padding:4px">Aucun pack — créez-en un d\'abord</div>';
   document.getElementById('add-alacarte-grid').innerHTML=CHAINES.map(ch=>`
     <label class="ch-cb-item" onclick="this.classList.toggle('checked')">
       <input type="checkbox" value="${ch.name}"><span>${ch.name}</span>
     </label>`).join('');
-  setTimeout(()=>document.getElementById('f-stbid').focus(),100);
+  setTimeout(()=>document.getElementById('f-stbid').focus(),120);
 }
-function closeAdd(){ document.getElementById('modal-add').classList.remove('open'); }
+function closeAdd(){
+  document.getElementById('modal-add').classList.remove('open');
+}
+
+function setFieldError(fieldId, msg){
+  const el=document.getElementById(fieldId);
+  if(el){ el.style.borderColor=msg?'var(--red)':''; }
+}
 
 async function submitAdd(){
   const stb_id=document.getElementById('f-stbid').value.trim();
-  const room=document.getElementById('f-room').value.trim();
-  const packs=[...document.querySelectorAll('#add-pack-grid input:checked')].map(i=>i.value);
+  const room  =document.getElementById('f-room').value.trim();
+  const errEl =document.getElementById('add-form-error');
+  errEl.textContent='';
+  setFieldError('f-stbid',''); setFieldError('f-room','');
+
+  // Validations côté client
+  if(!stb_id){
+    setFieldError('f-stbid','requis');
+    errEl.textContent='Le STB ID est requis.';
+    document.getElementById('f-stbid').focus();
+    return;
+  }
+  if(!/^stb-\d+$/.test(stb_id)){
+    setFieldError('f-stbid','format');
+    errEl.textContent='Format attendu : stb-01, stb-02, stb-03...';
+    document.getElementById('f-stbid').focus();
+    return;
+  }
+  if(!room){
+    setFieldError('f-room','requis');
+    errEl.textContent='Le numéro de chambre est requis.';
+    document.getElementById('f-room').focus();
+    return;
+  }
+  // Vérifie doublon localement avant d'appeler l'API
+  if(CLIENTS.find(c=>c.stb_id===stb_id)){
+    setFieldError('f-stbid','doublon');
+    errEl.textContent='Ce STB ID existe déjà : '+stb_id;
+    document.getElementById('f-stbid').focus();
+    return;
+  }
+  if(CLIENTS.find(c=>c.room===room)){
+    setFieldError('f-room','doublon');
+    errEl.textContent='La chambre '+room+' a déjà un abonné assigné.';
+    return;
+  }
+
+  const packs        =[...document.querySelectorAll('#add-pack-grid input:checked')].map(i=>i.value);
   const subscriptions=[...document.querySelectorAll('#add-alacarte-grid input:checked')].map(i=>i.value);
-  if(!stb_id||!room){ notify('STB ID et chambre requis'); return; }
+
+  const btn=document.querySelector('#modal-add .btn.ac');
+  const orig=btn.textContent;
+  btn.textContent='Ajout en cours...'; btn.disabled=true;
+
   try {
-    const r=await fetch('/admin/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({stb_id,room,packs,subscriptions})});
+    const r=await fetch('/admin/clients',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({stb_id,room,packs,subscriptions})
+    });
     const j=await r.json();
-    if(!r.ok){ notify(j.error||'Erreur'); return; }
-    closeAdd(); notify('Abonné '+stb_id+' ajouté · chambre '+room);
-  } catch(e){ notify('Erreur : '+e.message); }
+    if(!r.ok){
+      errEl.textContent=j.error||'Erreur serveur';
+      if(j.error&&j.error.includes('déjà existant')) setFieldError('f-stbid','doublon');
+      btn.textContent=orig; btn.disabled=false;
+      return;
+    }
+    closeAdd();
+    notify('✓ Abonné '+stb_id+' ajouté · chambre '+room+(packs.length?' · '+packs.length+' pack(s)':''));
+    uiLog('ok','Abonné ajouté · '+stb_id+' · chambre '+room);
+  } catch(e){
+    errEl.textContent='Erreur réseau : '+e.message;
+    btn.textContent=orig; btn.disabled=false;
+  }
 }
 
 async function delAb(id){
@@ -733,7 +1079,14 @@ async function delAb(id){
     const r=await fetch('/admin/clients/'+id,{method:'DELETE'});
     if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
     notify('Abonné '+id+' supprimé');
-    document.getElementById('ab-edit').innerHTML='<div class="empty">Abonné supprimé</div>';
+    selectedAbs.delete(id);
+    if(currentAbId===id){
+      currentAbId=null;
+      document.getElementById('ab-edit').innerHTML='<div class="empty" style="padding:48px 20px">← Cliquez sur un abonné<br>pour l\'éditer</div>';
+      const actEl=document.getElementById('ab-edit-actions');
+      if(actEl) actEl.style.display='none';
+      set('ab-edit-title','Modifier abonné');
+    }
   } catch(e){ notify('Erreur : '+e.message); }
 }
 
@@ -742,51 +1095,101 @@ function openPackModal(packId){
   editingPackId=packId||null;
   const pk=packId?getPackById(packId):null;
   set('pack-modal-title',pk?'Modifier le pack':'Créer un pack');
-  document.getElementById('p-id').value=pk?pk.id:'';
-  document.getElementById('p-id').disabled=!!pk;
+  const idEl=document.getElementById('p-id');
+  idEl.value=pk?pk.id:''; idEl.disabled=!!pk; idEl.style.borderColor='';
   document.getElementById('p-nom').value=pk?pk.nom:'';
-  document.getElementById('p-desc').value=pk?pk.description:'';
-  document.getElementById('p-couleur').value=pk?pk.couleur:'#4f6ef7';
-  document.getElementById('p-color-preview').style.background=pk?pk.couleur:'#4f6ef7';
+  document.getElementById('p-desc').value=pk?(pk.description||''):'';
+  const col=pk?pk.couleur:'#4f6ef7';
+  document.getElementById('p-couleur').value=col;
+  document.getElementById('p-color-preview').style.background=col;
+  document.getElementById('pack-form-error').textContent='';
   const checked=pk?new Set(pk.chaines):new Set();
   document.getElementById('pack-ch-grid').innerHTML=CHAINES.map(ch=>`
-    <label class="ch-cb-item${checked.has(ch.name)?' checked':''}" onclick="this.classList.toggle('checked')">
+    <label class="ch-cb-item${checked.has(ch.name)?' checked':''}" onclick="this.classList.toggle('checked');updatePackChCount()">
       <input type="checkbox" value="${ch.name}" ${checked.has(ch.name)?'checked':''}><span>${ch.name}</span>
-    </label>`).join('');
+    </label>`).join('') || '<div style="color:var(--muted);font-size:12px;padding:4px">Aucune chaîne disponible</div>';
   document.getElementById('modal-pack').classList.add('open');
+  setTimeout(updatePackChCount, 30);
 }
-
 function editPack(id){ openPackModal(id); }
 function closePackModal(){ document.getElementById('modal-pack').classList.remove('open'); }
 
 async function submitPack(){
-  const id=document.getElementById('p-id').value.trim();
-  const nom=document.getElementById('p-nom').value.trim();
-  const description=document.getElementById('p-desc').value.trim();
-  const couleur=document.getElementById('p-couleur').value.trim()||'#6b7080';
-  const chaines=[...document.querySelectorAll('#pack-ch-grid input:checked')].map(i=>i.value);
-  if(!id||!nom){ notify('ID et nom requis'); return; }
+  const id         = document.getElementById('p-id').value.trim();
+  const nom        = document.getElementById('p-nom').value.trim();
+  const description= document.getElementById('p-desc').value.trim();
+  const couleur    = document.getElementById('p-couleur').value.trim()||'#6b7080';
+  const chaines    = [...document.querySelectorAll('#pack-ch-grid input:checked')].map(i=>i.value);
+  const errEl      = document.getElementById('pack-form-error');
+  errEl.textContent='';
+
+  // Validations
+  if(!editingPackId){
+    if(!id){
+      errEl.textContent="L'identifiant est requis.";
+      document.getElementById('p-id').focus(); return;
+    }
+    if(!/^[a-z0-9_-]+$/.test(id)){
+      errEl.textContent="ID invalide : minuscules, chiffres, tirets uniquement. Ex: pack-sport";
+      document.getElementById('p-id').style.borderColor='var(--red)'; return;
+    }
+    if(PACKS.find(p=>p.id===id)){
+      errEl.textContent='Un pack avec cet ID existe déjà : '+id;
+      document.getElementById('p-id').style.borderColor='var(--red)'; return;
+    }
+  }
+  if(!nom){
+    errEl.textContent='Le nom est requis.';
+    document.getElementById('p-nom').focus(); return;
+  }
+  if(chaines.length===0){
+    errEl.textContent='Sélectionnez au moins une chaîne pour ce pack.'; return;
+  }
+
+  const btn=document.querySelector('#modal-pack .btn.ac');
+  const orig=btn.textContent;
+  btn.textContent='Enregistrement...'; btn.disabled=true;
+
   try {
-    const url=editingPackId?'/admin/packs/'+editingPackId:'/admin/packs';
+    const url   =editingPackId?'/admin/packs/'+editingPackId:'/admin/packs';
     const method=editingPackId?'PUT':'POST';
     const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nom,description,couleur,chaines})});
     const j=await r.json();
-    if(!r.ok){ notify(j.error||'Erreur'); return; }
+    if(!r.ok){
+      errEl.textContent=j.error||'Erreur serveur';
+      btn.textContent=orig; btn.disabled=false; return;
+    }
     closePackModal();
-    notify((editingPackId?'Pack modifié : ':'Pack créé : ')+nom+' · '+chaines.length+' chaînes');
-  } catch(e){ notify('Erreur : '+e.message); }
+    notify('✓ '+(editingPackId?'Pack modifié':'Pack créé')+' : '+nom+' · '+chaines.length+' chaîne(s)');
+    uiLog('ok',(editingPackId?'Pack modifié':'Nouveau pack')+' · '+(editingPackId||id)+' · '+chaines.length+' chaînes');
+  } catch(e){
+    errEl.textContent='Erreur réseau : '+e.message;
+    btn.textContent=orig; btn.disabled=false;
+  }
 }
 
 async function deletePack(id){
   const pk=getPackById(id);
   const abonnes=CLIENTS.filter(c=>(c.packs||[]).includes(id)).length;
-  const msg=`Supprimer le pack "${pk?pk.nom:id}" ?\n${abonnes>0?abonnes+' abonné(s) perdront ce pack.':'Aucun abonné affecté.'}`;
+  const msg='Supprimer le pack "'+(pk?pk.nom:id)+'" ?\n'+(abonnes>0?'⚠ '+abonnes+' abonné(s) perdront ce pack.':'Aucun abonné affecté.');
   if(!confirm(msg)) return;
   try {
     const r=await fetch('/admin/packs/'+id,{method:'DELETE'});
     if(!r.ok){ const j=await r.json(); notify(j.error||'Erreur'); return; }
-    notify('Pack supprimé : '+(pk?pk.nom:id));
+    notify('✓ Pack supprimé : '+(pk?pk.nom:id)+(abonnes>0?' · '+abonnes+' abonné(s) mis à jour':''));
+    uiLog('warn','Pack supprimé · '+id+(abonnes?' · retiré de '+abonnes+' abonné(s)':''));
   } catch(e){ notify('Erreur : '+e.message); }
+}
+
+// ── Helpers modal pack ────────────────────────────────────────────
+function setPackColor(hex){
+  document.getElementById('p-couleur').value=hex;
+  document.getElementById('p-color-preview').style.background=hex;
+}
+function updatePackChCount(){
+  const n=document.querySelectorAll('#pack-ch-grid input:checked').length;
+  const el=document.getElementById('pack-ch-count');
+  if(el) el.textContent='('+n+' sélectionnée'+(n>1?'s':')');
 }
 
 // ── SYSTÈME ──────────────────────────────────────────────────────
@@ -830,6 +1233,45 @@ function fmtUp(s){ if(!s&&s!==0) return '—'; const h=Math.floor(s/3600),m=Math
 let _nt;
 function notify(msg){ const e=document.getElementById('notif'); e.textContent=msg; e.classList.add('show'); clearTimeout(_nt); _nt=setTimeout(()=>e.classList.remove('show'),3500); }
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); }));
+
+// ── AUTHENTIFICATION ADMIN ────────────────────────────────────
+const ADMIN_TOKEN = sessionStorage.getItem('admin_token');
+const ADMIN_USER  = sessionStorage.getItem('admin_user');
+
+// Redirige vers login si pas de token
+if (!ADMIN_TOKEN) { window.location.href = '/login.html'; }
+
+// Affiche le nom de l'utilisateur connecté
+if (ADMIN_USER) { const el=document.getElementById('admin-user'); if(el) el.textContent=ADMIN_USER; }
+
+// Vérifie que le token est encore valide au chargement
+fetch('/admin/auth/verify', { headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN } })
+  .then(r => { if (!r.ok) { sessionStorage.clear(); window.location.href = '/login.html'; } })
+  .catch(() => {});
+
+// Injecte le token dans TOUS les appels fetch vers /admin/*
+const _origFetch = window.fetch;
+window.fetch = function(url, opts={}) {
+  if (typeof url === 'string' && url.startsWith('/admin')) {
+    opts.headers = opts.headers || {};
+    if (!opts.headers['Authorization']) {
+      opts.headers['Authorization'] = 'Bearer ' + ADMIN_TOKEN;
+    }
+  }
+  return _origFetch(url, opts);
+};
+
+// Déconnexion
+async function doLogout() {
+  try {
+    await fetch('/admin/auth/logout', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+    });
+  } catch(_) {}
+  sessionStorage.clear();
+  window.location.href = '/login.html';
+}
 
 // ── DÉMARRAGE ────────────────────────────────────────────────────
 connectSSE();

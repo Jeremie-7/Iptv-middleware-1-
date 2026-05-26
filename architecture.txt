@@ -13,7 +13,7 @@ Projet_2026/
 	 	──CLIENTS.json
 	 ── certs/
 	 	└──ca.key
-	 	──certificats de CA, la STB, du streamer, de l'application python
+	 	──certificats de CA, middleware, la STB, du streamer, de l'application python
 	 ── public/
       		└── admin.html
 	

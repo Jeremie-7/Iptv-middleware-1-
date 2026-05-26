@@ -2,13 +2,23 @@
   {
     "room": "01",
     "stb_id": "stb-01",
-    "packs": ["info"],
-    "subscriptions": ["Arte"]
+    "packs": [
+      
+    ],
+    "subscriptions": [
+      "Arte",
+      "BFM TV"
+    ]
   },
   {
     "room": "02",
-    "stb_id": "stb-02",
-    "packs": ["divertissement", "sport"],
-    "subscriptions": []
+    "stb_id": "Pythonapp",
+    "packs": [
+      
+    ],
+    "subscriptions": [
+      "Arte",
+      "BFM TV"
+    ]
   }
 ]
