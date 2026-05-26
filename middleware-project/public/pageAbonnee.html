@@ -3,384 +3,658 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPTV — Inscription Abonné</title>
+<title>IPTV — Espace Client</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
+:root{
   --bg:#0c0e14;--bg2:#13161f;--bg3:#1a1e2a;
   --border:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.14);
   --text:#e8eaf2;--muted:#6b7080;
-  --accent:#4f6ef7;--green:#22d3a0;--amber:#f59e0b;--red:#f43f5e;--cyan:#06b6d4;--purple:#7c3aed;
+  --accent:#4f6ef7;--green:#22d3a0;--amber:#f59e0b;
+  --red:#f43f5e;--cyan:#06b6d4;--purple:#7c3aed;
   --mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px 16px}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(79,110,247,.03)1px,transparent 1px),linear-gradient(90deg,rgba(79,110,247,.03)1px,transparent 1px);
+  background-image:linear-gradient(rgba(79,110,247,.03)1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,110,247,.03)1px,transparent 1px);
   background-size:40px 40px}
 
-/* CARD */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:540px;overflow:hidden;position:relative;z-index:1}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:580px;overflow:hidden;position:relative;z-index:1;
+  box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.card-wide{max-width:780px}
 
 /* HEADER */
-.card-header{padding:32px 36px 28px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(79,110,247,.08),rgba(6,182,212,.04))}
-.hotel-badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(79,110,247,.12);border:1px solid rgba(79,110,247,.2);padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:14px}
-.card-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
-.card-title span{color:var(--accent)}
-.card-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.card-header{padding:24px 32px 20px;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(79,110,247,.08),rgba(6,182,212,.04));
+  display:flex;align-items:center;gap:14px}
+.hicon{width:40px;height:40px;border-radius:10px;background:rgba(79,110,247,.15);
+  border:1px solid rgba(79,110,247,.25);display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0}
+.hotel-name{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.card-title{font-size:18px;font-weight:800;letter-spacing:-.02em}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:13px;text-align:center;font-size:13px;font-weight:700;
+  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(79,110,247,.05)}
 
 /* BODY */
-.card-body{padding:30px 36px 36px}
+.card-body{padding:24px 32px 28px}
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
 /* FORM */
-.form-group{margin-bottom:20px}
-.form-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:14px;padding:11px 14px;border-radius:8px;outline:none;transition:border-color .15s}
+.form-group{margin-bottom:16px}
+.form-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 13px;
+  border-radius:8px;outline:none;transition:border-color .15s}
 .form-input:focus{border-color:var(--accent)}
 .form-input::placeholder{color:var(--muted)}
-.form-input.error{border-color:var(--red)}
-
-/* INPUT PASSWORD wrapper */
 .input-wrap{position:relative}
-.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px}
-.toggle-pw:hover{color:var(--text)}
-
-/* PACK GRID */
-.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
-.pack-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
-.pack-item:hover{border-color:var(--bh)}
-.pack-item.selected{border-color:var(--accent);background:rgba(79,110,247,.08)}
-.pack-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.pack-name{font-size:13px;font-weight:700;margin-bottom:2px}
-.pack-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.pack-check{margin-left:auto;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.pack-item.selected .pack-check{background:var(--accent);border-color:var(--accent)}
-.pack-item.selected .pack-check::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
-
-/* RADIO CHAMBRE */
-.room-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:2px}
-.room-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;cursor:pointer;text-align:center;font-family:var(--mono);font-size:12px;transition:all .15s}
-.room-item:hover{border-color:var(--bh)}
-.room-item.selected{border-color:var(--cyan);background:rgba(6,182,212,.08);color:var(--cyan)}
-
-/* PASSWORD STRENGTH */
-.pw-strength{margin-top:8px;height:3px;border-radius:2px;background:var(--bg3);overflow:hidden}
-.pw-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
-.pw-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:5px}
-
-/* SUBMIT */
-.btn-submit{width:100%;background:var(--accent);color:#fff;border:none;font-family:var(--sans);font-size:15px;font-weight:700;padding:14px;border-radius:8px;cursor:pointer;transition:all .15s;letter-spacing:.02em;margin-top:8px}
-.btn-submit:hover{background:#3a5af0;transform:translateY(-1px)}
-.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
 
 /* MESSAGES */
-.msg{padding:12px 16px;border-radius:8px;font-family:var(--mono);font-size:12px;margin-bottom:20px;display:none}
-.msg.success{background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.25);color:var(--green)}
-.msg.error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);color:var(--red)}
+.msg{padding:10px 13px;border-radius:7px;font-family:var(--mono);font-size:11px;
+  margin-bottom:14px;display:none;line-height:1.5}
+.msg.ok{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);color:var(--green)}
+.msg.err{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--red)}
 
-/* DIVIDER */
-.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+/* SUBMIT */
+.btn{width:100%;background:var(--accent);color:#fff;border:none;
+  font-family:var(--sans);font-size:14px;font-weight:700;padding:12px;
+  border-radius:8px;cursor:pointer;transition:all .15s;margin-top:4px}
+.btn:hover:not(:disabled){background:#3a5af0;transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-outline{width:100%;background:transparent;color:var(--muted);
+  border:1px solid var(--border);font-family:var(--sans);font-size:13px;
+  font-weight:600;padding:10px;border-radius:8px;cursor:pointer;transition:all .15s;margin-top:6px}
+.btn-outline:hover{color:var(--text);border-color:var(--bh)}
+.btn-sm{width:auto;padding:7px 16px;font-size:12px;border-radius:6px}
 
-/* FOOTER LINK */
-.footer-link{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:20px}
-.footer-link a{color:var(--accent);text-decoration:none}
-.footer-link a:hover{text-decoration:underline}
-
-/* LOADING SPINNER */
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;display:none}
+/* SPINNER */
+.spin{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;
+  vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* SUCCESS SCREEN */
-.success-screen{display:none;text-align:center;padding:20px 0}
-.success-icon{font-size:48px;margin-bottom:16px}
-.success-title{font-size:22px;font-weight:800;color:var(--green);margin-bottom:8px}
-.success-sub{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6}
-.success-info{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin:20px 0;text-align:left}
-.success-info-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:4px 0}
-.success-info-row span:first-child{color:var(--muted)}
-.success-info-row span:last-child{color:var(--text);font-weight:600}
+/* USER HEADER */
+.user-bar{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:18px}
+.user-av{width:36px;height:36px;border-radius:50%;background:rgba(79,110,247,.2);
+  border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0}
+.user-name{font-size:14px;font-weight:800}
+.user-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:1px}
+.user-logout{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red);
+  cursor:pointer;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);
+  padding:5px 11px;border-radius:6px;transition:all .15s}
+.user-logout:hover{background:rgba(244,63,94,.15)}
 
-/* RESPONSIVE */
+/* STATS */
+.stats{display:flex;gap:8px;margin-bottom:18px}
+.stat{flex:1;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px;text-align:center}
+.stat-v{font-size:20px;font-weight:800;margin-bottom:2px}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em}
+
+/* SECTION */
+.section-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px}
+.section-title span{flex:1;height:0.5px;background:var(--border)}
+
+/* PACKS GRID */
+.packs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pack-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;position:relative}
+.pack-card:hover{border-color:var(--bh)}
+.pack-card.active{border-color:var(--accent);background:rgba(79,110,247,.07)}
+.pack-card.owned{border-color:var(--green);background:rgba(34,211,160,.06)}
+.pack-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pack-info{flex:1;min-width:0}
+.pack-name{font-size:12px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pack-meta{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.pack-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pack-card.active .pack-check,.pack-card.owned .pack-check{
+  border-color:var(--accent);background:var(--accent)}
+.pack-card.owned .pack-check{border-color:var(--green);background:var(--green)}
+.pack-card.active .pack-check::after,.pack-card.owned .pack-check::after{
+  content:'✓';color:#fff;font-size:9px;font-weight:700}
+.pack-live{position:absolute;top:6px;right:6px;font-family:var(--mono);font-size:9px;
+  color:var(--green);background:rgba(34,211,160,.12);padding:2px 6px;border-radius:3px}
+
+/* CHAINES */
+.ch-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ch-tag{font-family:var(--mono);font-size:10px;padding:4px 9px;
+  border-radius:4px;cursor:pointer;transition:all .15s;
+  background:rgba(6,182,212,.07);color:var(--cyan);border:1px solid rgba(6,182,212,.18)}
+.ch-tag:hover{background:rgba(6,182,212,.14)}
+.ch-tag.owned{background:rgba(34,211,160,.1);color:var(--green);border-color:rgba(34,211,160,.25)}
+.ch-tag.in-pack{opacity:.4;cursor:default;text-decoration:line-through}
+
+/* RÉSUMÉ chaînes */
+.ch-summary{background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;margin-top:12px}
+.ch-summary-title{font-family:var(--mono);font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+hr{border:none;border-top:0.5px solid var(--border);margin:16px 0}
+
+/* PW STRENGTH */
+.pw-bar-wrap{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:6px}
+.pw-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+.pw-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px}
+
 @media(max-width:480px){
-  .card-header,.card-body{padding-left:22px;padding-right:22px}
-  .pack-grid{grid-template-columns:1fr}
-  .room-grid{grid-template-columns:repeat(3,1fr)}
+  .card-header,.card-body{padding-left:18px;padding-right:18px}
+  .packs-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="main-card">
 
   <!-- HEADER -->
   <div class="card-header">
-    <div class="hotel-badge">Hôtel IPTV · Inscription</div>
-    <h1 class="card-title">Créer votre <span>abonnement</span></h1>
-    <p class="card-sub">Accédez aux chaînes TV de votre chambre</p>
+    <div class="hicon">📺</div>
+    <div>
+      <div class="hotel-name">Hôtel — Service IPTV</div>
+      <div class="card-title" id="header-title">Espace Client</div>
+    </div>
   </div>
 
-  <!-- BODY -->
+  <!-- ONGLETS connexion/inscription -->
+  <div class="tabs" id="auth-tabs">
+    <div class="tab active" onclick="switchTab('login')">Se connecter</div>
+    <div class="tab" onclick="switchTab('register')">S'inscrire</div>
+  </div>
+
   <div class="card-body">
 
-    <!-- Message feedback -->
-    <div class="msg" id="msg"></div>
-
-    <!-- FORMULAIRE -->
-    <form id="form" autocomplete="off">
-
-      <!-- Identifiant -->
+    <!-- ═══ CONNEXION ═══ -->
+    <div class="screen active" id="screen-login">
+      <div class="msg" id="msg-login"></div>
       <div class="form-group">
-        <label class="form-label" for="identifiant">Identifiant</label>
-        <input class="form-input" type="text" id="identifiant" placeholder="ex: chambre-01, jean.dupont..." autocomplete="off" required>
+        <label class="form-label">Identifiant</label>
+        <input class="form-input" type="text" id="login-id" placeholder="Votre identifiant">
       </div>
-
-      <!-- Mot de passe -->
       <div class="form-group">
-        <label class="form-label" for="password">Mot de passe</label>
+        <label class="form-label">Mot de passe</label>
         <div class="input-wrap">
-          <input class="form-input" type="password" id="password" placeholder="Minimum 6 caractères" autocomplete="new-password" required oninput="checkStrength(this.value)">
-          <button type="button" class="toggle-pw" onclick="togglePw()">👁</button>
+          <input class="form-input" type="password" id="login-pw" placeholder="Votre mot de passe">
+          <button type="button" class="toggle-pw" onclick="togglePw('login-pw')">👁</button>
         </div>
-        <div class="pw-strength"><div class="pw-bar" id="pw-bar"></div></div>
-        <div class="pw-hint" id="pw-hint">—</div>
       </div>
-
-      <!-- Numéro de chambre -->
-      <div class="form-group">
-        <label class="form-label">Numéro de chambre</label>
-        <div class="room-grid" id="room-grid">
-          <!-- Généré dynamiquement -->
-          <div class="room-item" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:11px">Chargement...</div>
-        </div>
-        <input type="hidden" id="room" required>
-      </div>
-
-      <!-- Pack -->
-      <div class="form-group">
-        <label class="form-label">Pack souhaité</label>
-        <div class="pack-grid" id="pack-grid">
-          <div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:16px">Chargement des packs...</div>
-        </div>
-        <input type="hidden" id="packId" required>
-      </div>
-
-      <hr class="divider">
-
-      <!-- Submit -->
-      <button type="submit" class="btn-submit" id="btn-submit">
-        <span class="spinner" id="spinner"></span>
-        Créer mon abonnement
+      <button class="btn" onclick="doLogin()">
+        <span class="spin" id="sp-login"></span>Se connecter
       </button>
-
-    </form>
-
-    <!-- Écran succès -->
-    <div class="success-screen" id="success-screen">
-      <div class="success-icon">✅</div>
-      <div class="success-title">Abonnement créé !</div>
-      <div class="success-sub">Votre abonnement a bien été enregistré.<br>Vous pouvez maintenant accéder à vos chaînes TV.</div>
-      <div class="success-info" id="success-info"></div>
-      <button class="btn-submit" onclick="resetForm()" style="margin-top:0">Créer un autre abonnement</button>
     </div>
 
-  </div>
-</div>
+    <!-- ═══ INSCRIPTION (étape 1 : infos seulement) ═══ -->
+    <div class="screen" id="screen-register">
+      <div class="msg" id="msg-register"></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)">
+        Créez votre compte · Vous choisirez vos abonnements après.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Identifiant</label>
+        <input class="form-input" type="text" id="reg-id" placeholder="ex: chambre03, jean.dupont...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <input class="form-input" type="password" id="reg-pw"
+            placeholder="Minimum 6 caractères" oninput="checkStrength(this.value)">
+          <button type="button" class="toggle-pw" onclick="togglePw('reg-pw')">👁</button>
+        </div>
+        <div class="pw-bar-wrap"><div class="pw-bar" id="pw-bar"></div></div>
+        <div class="pw-hint" id="pw-hint">—</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Numéro de chambre</label>
+        <input class="form-input" type="text" id="reg-room" placeholder="ex: 01, 02...">
+      </div>
+      <button class="btn" onclick="doRegister()">
+        <span class="spin" id="sp-register"></span>Créer mon compte
+      </button>
+    </div>
 
-<div class="footer-link">
-  <a href="/admin.html">← Retour au dashboard admin</a>
+    <!-- ═══ ESPACE ABONNÉ (après connexion) ═══ -->
+    <div class="screen" id="screen-dashboard">
+
+      <!-- En-tête utilisateur -->
+      <div class="user-bar">
+        <div class="user-av">🏠</div>
+        <div>
+          <div class="user-name" id="d-name">—</div>
+          <div class="user-meta">Chambre <span id="d-room">—</span></div>
+        </div>
+        <div class="user-logout" onclick="doLogout()">Déconnexion</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-v" id="d-ch-count" style="color:var(--green)">0</div>
+          <div class="stat-l">Chaînes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-v" id="d-pack-count" style="color:var(--accent)">0</div>
+          <div class="stat-l">Packs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-v" id="d-alacarte-count" style="color:var(--amber)">0</div>
+          <div class="stat-l">À-la-carte</div>
+        </div>
+        <div class="stat">
+          <div class="stat-v" id="d-live-count" style="color:var(--cyan)">0</div>
+          <div class="stat-l">Diffusées</div>
+        </div>
+      </div>
+
+      <div class="msg" id="msg-dashboard"></div>
+
+      <!-- PACKS disponibles -->
+      <div class="section-title">Abonnements disponibles <span></span>
+        <span style="font-size:9px;color:var(--green)">● En direct</span>
+      </div>
+      <div class="packs-grid" id="d-packs">
+        <div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;
+          color:var(--muted);text-align:center;padding:14px">Chargement...</div>
+      </div>
+      <div id="btn-save-wrap" style="display:none;margin-bottom:14px">
+        <button class="btn" onclick="savePacks()">
+          <span class="spin" id="sp-save"></span>Mettre à jour mes abonnements
+        </button>
+      </div>
+
+      <hr>
+
+      <!-- CHAÎNES À-LA-CARTE -->
+      <div class="section-title">Chaînes à-la-carte <span></span>
+        <span style="font-size:9px;color:var(--muted)">(en supplément des packs)</span>
+      </div>
+      <div class="ch-grid" id="d-alacarte">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Chargement...</span>
+      </div>
+      <div id="btn-save-alacarte-wrap" style="display:none;margin-bottom:14px">
+        <button class="btn" onclick="saveAlaCarte()">
+          <span class="spin" id="sp-alacarte"></span>Mettre à jour les chaînes à-la-carte
+        </button>
+      </div>
+
+      <hr>
+
+      <!-- RÉSUMÉ chaînes accessibles -->
+      <div class="section-title">Mes chaînes accessibles <span></span></div>
+      <div class="ch-summary">
+        <div class="ch-summary-title">
+          <span id="d-ch-label">0</span> chaîne(s) — via packs + à-la-carte
+        </div>
+        <div class="ch-grid" id="d-ch-list">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────
-const BASE = '';
-let selectedPack = null;
-let selectedRoom = null;
+// ── État ──────────────────────────────────────────────────────
+let session       = null;   // { stbId, room, packs, subscriptions, channels }
+let allPacks      = [];     // packs disponibles sur le serveur
+let allChaines    = [];     // chaînes diffusées par le streamer
+let selectedPacks = [];     // packs sélectionnés dans le dashboard
+let selectedAC    = [];     // à-la-carte sélectionnées
 
-// ── Chargement des packs disponibles ─────────────────────────
-async function loadPacks() {
+// ── Tabs auth ────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', (name==='login'&&i===0)||(name==='register'&&i===1)));
+  showScreen(name==='login' ? 'screen-login' : 'screen-register');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const isDash = id === 'screen-dashboard';
+  document.getElementById('auth-tabs').style.display = isDash ? 'none' : 'flex';
+  document.getElementById('header-title').textContent =
+    isDash ? 'Mon abonnement' : 'Espace Client';
+  // Agrandit la carte pour le dashboard
+  document.getElementById('main-card').classList.toggle('card-wide', isDash);
+}
+
+// ── Messages ────────────────────────────────────────────────
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
+  setTimeout(() => { if(el.textContent===text) el.style.display='none'; }, 4000);
+}
+
+// ── Toggle password ──────────────────────────────────────────
+function togglePw(id) {
+  const i = document.getElementById(id);
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+// ── Force mot de passe ───────────────────────────────────────
+function checkStrength(v) {
+  let s = 0;
+  if(v.length>=6)s++;if(v.length>=10)s++;
+  if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const l=[
+    {w:'0%',bg:'transparent',t:'—'},
+    {w:'25%',bg:'var(--red)',t:'Trop court'},
+    {w:'50%',bg:'var(--amber)',t:'Faible'},
+    {w:'75%',bg:'var(--amber)',t:'Moyen'},
+    {w:'90%',bg:'var(--green)',t:'Fort'},
+    {w:'100%',bg:'var(--green)',t:'Très fort ✓'},
+  ][Math.min(s,5)];
+  const bar=document.getElementById('pw-bar');
+  bar.style.width=l.w;bar.style.background=l.bg;
+  const hint=document.getElementById('pw-hint');
+  hint.textContent=l.t;hint.style.color=l.bg;
+}
+
+// ── Chargement des données serveur ───────────────────────────
+async function loadServerData() {
   try {
-    const r = await fetch(`${BASE}/admin/packs`);
-    const packs = await r.json();
-    const grid = document.getElementById('pack-grid');
-
-    if (!packs.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:16px">Aucun pack disponible</div>';
-      return;
-    }
-
-    grid.innerHTML = packs.map(p => `
-      <div class="pack-item" data-id="${p.id}" onclick="selectPack('${p.id}', this)">
-        <div class="pack-dot" style="background:${p.couleur||'#6b7080'}"></div>
-        <div style="flex:1">
-          <div class="pack-name">${p.nom}</div>
-          <div class="pack-count">${p.chaines.length} chaîne${p.chaines.length>1?'s':''}</div>
-        </div>
-        <div class="pack-check"></div>
-      </div>
-    `).join('');
+    const [rPacks, rChaines] = await Promise.all([
+      fetch('/admin/packs'),
+      fetch('/channels')
+    ]);
+    allPacks   = await rPacks.json();
+    const ch   = await rChaines.json();
+    allChaines = Array.isArray(ch) ? ch : (ch.data || []);
   } catch(e) {
-    document.getElementById('pack-grid').innerHTML =
-      '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;padding:16px">Erreur chargement packs</div>';
+    console.error('Erreur chargement données:', e);
   }
 }
 
-// ── Chargement des chambres disponibles ──────────────────────
-async function loadRooms() {
+// ── CONNEXION ────────────────────────────────────────────────
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if(!id||!pw) return showMsg('msg-login','Identifiant et mot de passe requis','err');
+
+  const sp = document.getElementById('sp-login');
+  sp.style.display='inline-block';
   try {
-    const r = await fetch(`${BASE}/admin/clients`);
-    const clients = await r.json();
-    const occupees = new Set(clients.map(c => c.room));
-
-    // Chambres 01 à 20 — adapter selon l'hôtel
-    const toutes = Array.from({length:20}, (_,i) => String(i+1).padStart(2,'0'));
-    const libres = toutes.filter(r => !occupees.has(r));
-
-    const grid = document.getElementById('room-grid');
-
-    if (!libres.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;padding:16px">Toutes les chambres sont occupées</div>';
-      return;
-    }
-
-    grid.innerHTML = libres.map(r =>
-      `<div class="room-item" onclick="selectRoom('${r}', this)">${r}</div>`
-    ).join('');
-
-  } catch(e) {
-    // Fallback : saisie libre
-    document.getElementById('room-grid').outerHTML =
-      '<input class="form-input" type="text" id="room" placeholder="Numéro de chambre" required>';
-  }
-}
-
-// ── Sélection pack ────────────────────────────────────────────
-function selectPack(id, el) {
-  document.querySelectorAll('.pack-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedPack = id;
-  document.getElementById('packId').value = id;
-}
-
-// ── Sélection chambre ─────────────────────────────────────────
-function selectRoom(r, el) {
-  document.querySelectorAll('.room-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedRoom = r;
-  document.getElementById('room').value = r;
-}
-
-// ── Force du mot de passe ─────────────────────────────────────
-function checkStrength(val) {
-  const bar  = document.getElementById('pw-bar');
-  const hint = document.getElementById('pw-hint');
-  let score = 0;
-  if (val.length >= 6)  score++;
-  if (val.length >= 10) score++;
-  if (/[A-Z]/.test(val)) score++;
-  if (/[0-9]/.test(val)) score++;
-  if (/[^A-Za-z0-9]/.test(val)) score++;
-
-  const levels = [
-    { w:'0%',   bg:'transparent', label:'—' },
-    { w:'25%',  bg:'var(--red)',   label:'Trop court' },
-    { w:'50%',  bg:'var(--amber)', label:'Faible' },
-    { w:'75%',  bg:'var(--amber)', label:'Moyen' },
-    { w:'90%',  bg:'var(--green)', label:'Fort' },
-    { w:'100%', bg:'var(--green)', label:'Très fort ✓' },
-  ];
-  const lv = levels[Math.min(score, 5)];
-  bar.style.width = lv.w;
-  bar.style.background = lv.bg;
-  hint.textContent = lv.label;
-  hint.style.color = lv.bg;
-}
-
-// ── Toggle visibilité mot de passe ────────────────────────────
-function togglePw() {
-  const inp = document.getElementById('password');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-// ── Affichage message ─────────────────────────────────────────
-function showMsg(text, type) {
-  const el = document.getElementById('msg');
-  el.textContent = text;
-  el.className = `msg ${type}`;
-  el.style.display = 'block';
-  setTimeout(() => { if(el.textContent===text) el.style.display='none'; }, 5000);
-}
-
-// ── Soumission formulaire ─────────────────────────────────────
-document.getElementById('form').addEventListener('submit', async e => {
-  e.preventDefault();
-
-  const identifiant = document.getElementById('identifiant').value.trim();
-  const password    = document.getElementById('password').value;
-  const room        = document.getElementById('room').value;
-  const packId      = document.getElementById('packId').value;
-
-  // Validations côté client
-  if (!identifiant) return showMsg('L\'identifiant est obligatoire', 'error');
-  if (identifiant.length < 3) return showMsg('L\'identifiant doit contenir au moins 3 caractères', 'error');
-  if (!password || password.length < 6) return showMsg('Le mot de passe doit contenir au moins 6 caractères', 'error');
-  if (!room) return showMsg('Veuillez sélectionner un numéro de chambre', 'error');
-  if (!packId) return showMsg('Veuillez sélectionner un pack', 'error');
-
-  // UI loading
-  const btn     = document.getElementById('btn-submit');
-  const spinner = document.getElementById('spinner');
-  btn.disabled = true;
-  spinner.style.display = 'inline-block';
-
-  try {
-    const r = await fetch(`${BASE}/register`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ identifiant, password, room, packId }),
+    const r = await fetch('/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({identifiant:id, password:pw})
     });
-
     const data = await r.json();
-
-    if (!r.ok) {
-      showMsg(data.error || 'Erreur lors de l\'inscription', 'error');
-      return;
-    }
-
-    // Succès — affiche l'écran de confirmation
-    document.getElementById('form').style.display = 'none';
-    document.getElementById('success-screen').style.display = 'block';
-    document.getElementById('success-info').innerHTML = `
-      <div class="success-info-row"><span>Identifiant</span><span>${identifiant}</span></div>
-      <div class="success-info-row"><span>Chambre</span><span>${room}</span></div>
-      <div class="success-info-row"><span>Pack souscrit</span><span>${data.pack || packId}</span></div>
-      <div class="success-info-row"><span>Chaînes accessibles</span><span>${data.channelCount || '—'}</span></div>
-    `;
-
-  } catch(err) {
-    showMsg('Impossible de contacter le serveur', 'error');
-  } finally {
-    btn.disabled = false;
-    spinner.style.display = 'none';
-  }
-});
-
-// ── Reset formulaire ──────────────────────────────────────────
-function resetForm() {
-  document.getElementById('form').reset();
-  document.getElementById('form').style.display = 'block';
-  document.getElementById('success-screen').style.display = 'none';
-  document.getElementById('msg').style.display = 'none';
-  document.getElementById('pw-bar').style.width = '0';
-  document.getElementById('pw-hint').textContent = '—';
-  selectedPack = null;
-  selectedRoom = null;
-  document.querySelectorAll('.pack-item').forEach(i => i.classList.remove('selected'));
-  document.querySelectorAll('.room-item').forEach(i => i.classList.remove('selected'));
+    if(!r.ok) return showMsg('msg-login', data.error||'Identifiant ou mot de passe incorrect','err');
+    session = data;
+    session._pw = pw; // garde pour les mises à jour
+    await loadServerData();
+    openDashboard();
+  } catch(e) {
+    showMsg('msg-login','Impossible de contacter le serveur','err');
+  } finally { sp.style.display='none'; }
 }
 
-// ── Init ──────────────────────────────────────────────────────
-loadPacks();
-loadRooms();
+// ── INSCRIPTION (infos uniquement, sans packs) ───────────────
+async function doRegister() {
+  const id   = document.getElementById('reg-id').value.trim();
+  const pw   = document.getElementById('reg-pw').value;
+  const room = document.getElementById('reg-room').value.trim();
+  if(!id||id.length<3)    return showMsg('msg-register','Identifiant trop court (min 3 caractères)','err');
+  if(!pw||pw.length<6)    return showMsg('msg-register','Mot de passe trop court (min 6 caractères)','err');
+  if(!room)               return showMsg('msg-register','Numéro de chambre requis','err');
+
+  const sp = document.getElementById('sp-register');
+  sp.style.display='inline-block';
+  try {
+    // Crée le compte SANS pack — le client les choisira dans le dashboard
+    const r = await fetch('/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({identifiant:id, password:pw, room, packs:[], packId:''})
+    });
+    const data = await r.json();
+    if(!r.ok) return showMsg('msg-register', data.error||'Erreur lors de l\'inscription','err');
+
+    showMsg('msg-register','Compte créé ! Connexion en cours...','ok');
+    // Connexion automatique
+    setTimeout(async () => {
+      const r2 = await fetch('/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({identifiant:id, password:pw})
+      });
+      if(r2.ok) {
+        session = await r2.json();
+        session._pw = pw;
+        await loadServerData();
+        openDashboard();
+      }
+    }, 800);
+  } catch(e) {
+    showMsg('msg-register','Impossible de contacter le serveur','err');
+  } finally { sp.style.display='none'; }
+}
+
+// ── OUVERTURE DASHBOARD ABONNÉ ────────────────────────────────
+function openDashboard() {
+  document.getElementById('d-name').textContent  = session.stbId || '—';
+  document.getElementById('d-room').textContent  = session.room  || '—';
+  selectedPacks = [...(session.packs||[])];
+  selectedAC    = [...(session.subscriptions||[])];
+  updateStats();
+  renderPacks();
+  renderAlaCarte();
+  renderChannelList();
+  showScreen('screen-dashboard');
+}
+
+// ── STATS ────────────────────────────────────────────────────
+function updateStats() {
+  const channels = session.channels || [];
+  const live = channels.filter(ch => allChaines.find(c => c.name===ch.name));
+  document.getElementById('d-ch-count').textContent    = channels.length;
+  document.getElementById('d-pack-count').textContent  = selectedPacks.length;
+  document.getElementById('d-alacarte-count').textContent = selectedAC.length;
+  document.getElementById('d-live-count').textContent  = live.length;
+  document.getElementById('d-ch-label').textContent    = channels.length;
+}
+
+// ── RENDU PACKS ──────────────────────────────────────────────
+function renderPacks() {
+  const grid = document.getElementById('d-packs');
+  if(!allPacks.length) {
+    grid.innerHTML='<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:14px">Aucun pack disponible</div>';
+    return;
+  }
+
+  grid.innerHTML = allPacks.map(p => {
+    const owned   = selectedPacks.includes(p.id);
+    const col     = p.couleur || '#6b7080';
+    // Nombre de chaînes du pack réellement diffusées
+    const live    = p.chaines.filter(n => allChaines.find(c => c.name===n)).length;
+    const total   = p.chaines.length;
+    return `<div class="pack-card${owned?' owned':''}" data-id="${p.id}" onclick="togglePack('${p.id}',this)">
+      <div class="pack-dot" style="background:${col}"></div>
+      <div class="pack-info">
+        <div class="pack-name" style="color:${col}">${p.nom}</div>
+        <div class="pack-meta">${total} chaînes · <span style="color:var(--green)">${live} diffusées</span></div>
+      </div>
+      <div class="pack-check"></div>
+      ${live>0?'<div class="pack-live">● Live</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function togglePack(id, el) {
+  if(selectedPacks.includes(id))
+    selectedPacks = selectedPacks.filter(p=>p!==id);
+  else
+    selectedPacks.push(id);
+  el.classList.toggle('owned', selectedPacks.includes(id));
+  el.classList.toggle('active', selectedPacks.includes(id));
+  el.querySelector('.pack-check').classList.toggle('active', selectedPacks.includes(id));
+
+  // Recalcule les chaînes à-la-carte pour marquer celles déjà dans un pack
+  renderAlaCarte();
+
+  // Affiche le bouton sauvegarder si changement
+  const changed = JSON.stringify([...selectedPacks].sort()) !==
+                  JSON.stringify([...(session.packs||[])].sort());
+  document.getElementById('btn-save-wrap').style.display = changed?'block':'none';
+}
+
+// ── RENDU CHAÎNES À-LA-CARTE ─────────────────────────────────
+function renderAlaCarte() {
+  const grid = document.getElementById('d-alacarte');
+
+  // Chaînes dans les packs sélectionnés
+  const inPackNames = new Set();
+  selectedPacks.forEach(pid => {
+    const p = allPacks.find(x=>x.id===pid);
+    if(p) p.chaines.forEach(n=>inPackNames.add(n));
+  });
+
+  if(!allChaines.length) {
+    grid.innerHTML='<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne diffusée actuellement</span>';
+    return;
+  }
+
+  grid.innerHTML = allChaines.map(ch => {
+    const inPack  = inPackNames.has(ch.name);
+    const owned   = selectedAC.includes(ch.name);
+    let cls = 'ch-tag';
+    if(inPack)  cls += ' in-pack';
+    else if(owned) cls += ' owned';
+    const title = inPack ? 'Déjà incluse dans un pack' : (owned?'Retirer':'Ajouter à-la-carte');
+    return `<div class="${cls}" title="${title}"
+      onclick="${inPack?'':'toggleAC(\''+ch.name+'\',this)'}">${ch.name}</div>`;
+  }).join('');
+}
+
+function toggleAC(name, el) {
+  if(selectedAC.includes(name))
+    selectedAC = selectedAC.filter(n=>n!==name);
+  else
+    selectedAC.push(name);
+  el.classList.toggle('owned', selectedAC.includes(name));
+
+  const changed = JSON.stringify([...selectedAC].sort()) !==
+                  JSON.stringify([...(session.subscriptions||[])].sort());
+  document.getElementById('btn-save-alacarte-wrap').style.display = changed?'block':'none';
+}
+
+// ── RÉSUMÉ CHAÎNES ACCESSIBLES ────────────────────────────────
+function renderChannelList() {
+  const channels = session.channels || [];
+  const list = document.getElementById('d-ch-list');
+  if(!channels.length) {
+    list.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne — sélectionnez un abonnement</span>';
+    return;
+  }
+  list.innerHTML = channels.map(ch => {
+    const live = !!allChaines.find(c=>c.name===ch.name);
+    return `<div class="ch-tag${live?' owned':''}" title="${live?'Diffusée en direct':'Non diffusée actuellement'}">${ch.name}${live?' ●':''}</div>`;
+  }).join('');
+}
+
+// ── SAUVEGARDE PACKS ─────────────────────────────────────────
+async function savePacks() {
+  const sp = document.getElementById('sp-save');
+  sp.style.display='inline-block';
+  document.querySelector('#btn-save-wrap .btn').disabled=true;
+  try {
+    const before = new Set(session.packs||[]);
+    const after  = new Set(selectedPacks);
+    const toAdd    = selectedPacks.filter(p=>!before.has(p));
+    const toRemove = [...before].filter(p=>!after.has(p));
+
+    for(const packId of toAdd)
+      await fetch('/subscriptions/packs',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'add',packId,identifiant:session.stbId,password:session._pw||''})});
+    for(const packId of toRemove)
+      await fetch('/subscriptions/packs',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'remove',packId,identifiant:session.stbId,password:session._pw||''})});
+
+    // Recharge la session
+    const r = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({identifiant:session.stbId,password:session._pw||''})});
+    if(r.ok){ session={...await r.json(),_pw:session._pw}; }
+
+    selectedPacks = [...(session.packs||[])];
+    updateStats(); renderPacks(); renderAlaCarte(); renderChannelList();
+    document.getElementById('btn-save-wrap').style.display='none';
+    showMsg('msg-dashboard','Abonnements mis à jour ✓','ok');
+  } catch(e){ showMsg('msg-dashboard','Erreur lors de la mise à jour','err'); }
+  finally{
+    sp.style.display='none';
+    document.querySelector('#btn-save-wrap .btn').disabled=false;
+  }
+}
+
+// ── SAUVEGARDE À-LA-CARTE ─────────────────────────────────────
+async function saveAlaCarte() {
+  const sp = document.getElementById('sp-alacarte');
+  sp.style.display='inline-block';
+  try {
+    const before = new Set(session.subscriptions||[]);
+    const after  = new Set(selectedAC);
+    const toAdd    = selectedAC.filter(n=>!before.has(n));
+    const toRemove = [...before].filter(n=>!after.has(n));
+
+    for(const ch of toAdd)
+      await fetch('/subscriptions/channels',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'add',channelName:ch,identifiant:session.stbId,password:session._pw||''})});
+    for(const ch of toRemove)
+      await fetch('/subscriptions/channels',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'remove',channelName:ch,identifiant:session.stbId,password:session._pw||''})});
+
+    const r = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({identifiant:session.stbId,password:session._pw||''})});
+    if(r.ok){ session={...await r.json(),_pw:session._pw}; }
+
+    selectedAC = [...(session.subscriptions||[])];
+    updateStats(); renderAlaCarte(); renderChannelList();
+    document.getElementById('btn-save-alacarte-wrap').style.display='none';
+    showMsg('msg-dashboard','Chaînes à-la-carte mises à jour ✓','ok');
+  } catch(e){ showMsg('msg-dashboard','Erreur','err'); }
+  finally{ sp.style.display='none'; }
+}
+
+// ── DÉCONNEXION ──────────────────────────────────────────────
+function doLogout() {
+  session=null; selectedPacks=[]; selectedAC=[];
+  document.getElementById('login-id').value='';
+  document.getElementById('login-pw').value='';
+  document.getElementById('btn-save-wrap').style.display='none';
+  document.getElementById('btn-save-alacarte-wrap').style.display='none';
+  switchTab('login');
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+loadServerData();
+document.addEventListener('keydown', e => {
+  if(e.key!=='Enter') return;
+  const active = document.querySelector('.screen.active');
+  if(!active) return;
+  if(active.id==='screen-login')    doLogin();
+  if(active.id==='screen-register') doRegister();
+});
 </script>
 </body>
 </html>

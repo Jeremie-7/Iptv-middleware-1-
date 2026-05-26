@@ -58,7 +58,8 @@ setInterval(() => {
 // S'applique à TOUTES les routes sauf /auth/login et /auth/verify
 function requireAdminAuth(req, res, next) {
   // Routes publiques — pas besoin de token
-  const publicRoutes = ["/auth/login", "/auth/verify"];
+  // const publicRoutes = ["/auth/login", "/auth/verify"];
+  const publicRoutes = ["/auth/login", "/auth/verify", "/packs", "/chaines/sync"];
   if (publicRoutes.some(r => req.path.startsWith(r))) return next();
 
   // Lecture du token depuis le header Authorization
@@ -591,12 +592,7 @@ router.post("/login", (req, res) => {
 module.exports = router;
 
 
-
-
-
-
-
-// Ancienne os.version
+// Ancienne version
 // // routes/admin.js  — v2 avec gestion des packs
 // const express  = require("express");
 // const router   = express.Router();
