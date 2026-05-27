@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+import time
 from hackrf import HackRf
 
-# Fréquences des multiplex
+# Fréquences des multiplex (en Hz)
 frequencies = [506e6, 546e6, 562e6, 586e6, 642e6]
-sample_rate = 2e6  # 2 MHz pour un bon compromis
+sample_rate = 2e6  # 2 MHz
 duration = 1  # en secondes
 n_samples = int(sample_rate * duration)
 
@@ -17,11 +19,12 @@ def scan_frequency(freq):
 
     # Acquisition
     samples = np.zeros(n_samples, dtype=np.complex64)
+
     def callback(data):
         nonlocal samples
         samples = np.frombuffer(data, dtype=np.complex64)
+
     hackrf.start_rx(callback)
-    # Attendre la durée d'acquisition
     import time
     time.sleep(duration)
     hackrf.stop_rx()
@@ -29,21 +32,31 @@ def scan_frequency(freq):
 
     return samples
 
+def save_samples_to_csv(samples, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Real', 'Imag'])
+        for s in samples:
+            writer.writerow([s.real, s.imag])
+    print(f"Les données ont été sauvegardées dans {filename}")
+
 def plot_spectrum(samples, freq_center):
-    # Calcul du spectre
     window = np.hanning(len(samples))
     spectrum = np.fft.fftshift(np.fft.fft(samples * window))
     freq_axis = np.fft.fftshift(np.fft.fftfreq(len(samples), d=1/sample_rate))
-    plt.plot(freq_axis / 1e6 + freq_center / 1e6, 20*np.log10(np.abs(spectrum)))
+    plt.plot(freq_axis / 1e6 + freq_center / 1e6, 20*np.log10(np.abs(spectrum)+1e-12))
     plt.xlabel('Fréquence (MHz)')
     plt.ylabel('Amplitude (dB)')
     plt.title(f'Spectre autour de {freq_center/1e6} MHz')
     plt.grid()
 
 plt.figure(figsize=(15, 10))
+
 for i, freq in enumerate(frequencies):
-    print(f"Scanning {freq/1e6} MHz...")
+    print(f"Scan de la fréquence {freq/1e6} MHz en cours...")
     samples = scan_frequency(freq)
+    filename = f"spectre_{int(freq/1e6)}MHz.csv"
+    save_samples_to_csv(samples, filename)
     plt.subplot(3, 2, i+1)
     plot_spectrum(samples, freq)
 
