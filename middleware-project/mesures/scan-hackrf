@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from hackrf import HackRf
+
+# Fréquences des multiplex
+frequencies = [506e6, 546e6, 562e6, 586e6, 642e6]
+sample_rate = 2e6  # 2 MHz pour un bon compromis
+duration = 1  # en secondes
+n_samples = int(sample_rate * duration)
+
+def scan_frequency(freq):
+    # Initialiser la HackRF
+    hackrf = HackRf()
+    hackrf.setup()
+    hackrf.set_sample_rate(sample_rate)
+    hackrf.set_freq(freq)
+
+    # Acquisition
+    samples = np.zeros(n_samples, dtype=np.complex64)
+    def callback(data):
+        nonlocal samples
+        samples = np.frombuffer(data, dtype=np.complex64)
+    hackrf.start_rx(callback)
+    # Attendre la durée d'acquisition
+    import time
+    time.sleep(duration)
+    hackrf.stop_rx()
+    hackrf.close()
+
+    return samples
+
+def plot_spectrum(samples, freq_center):
+    # Calcul du spectre
+    window = np.hanning(len(samples))
+    spectrum = np.fft.fftshift(np.fft.fft(samples * window))
+    freq_axis = np.fft.fftshift(np.fft.fftfreq(len(samples), d=1/sample_rate))
+    plt.plot(freq_axis / 1e6 + freq_center / 1e6, 20*np.log10(np.abs(spectrum)))
+    plt.xlabel('Fréquence (MHz)')
+    plt.ylabel('Amplitude (dB)')
+    plt.title(f'Spectre autour de {freq_center/1e6} MHz')
+    plt.grid()
+
+plt.figure(figsize=(15, 10))
+for i, freq in enumerate(frequencies):
+    print(f"Scanning {freq/1e6} MHz...")
+    samples = scan_frequency(freq)
+    plt.subplot(3, 2, i+1)
+    plot_spectrum(samples, freq)
+
+plt.tight_layout()
+plt.show()
