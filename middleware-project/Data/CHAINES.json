@@ -1,6 +1,6 @@
 {
   "success": true,
-  "count": 6,
+  "count": 4,
   "multiplexCount": 5,
   "packs": [
     {
@@ -101,90 +101,62 @@
       "description": "Chaînes récemment détectées par le streamer",
       "couleur": "#22d3a0",
       "chaines": [
-        "BFM TV",
-        "CNEWS",
-        "CSTAR",
-        "Gulli",
-        "T18",
-        "NOVO19"
+        "France 2",
+        "France 4",
+        "franceinfo",
+        "F3 Paris Ile-de-France"
       ]
     }
   ],
   "data": [
     {
-      "id": 515,
-      "name": "BFM TV",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 257,
+      "name": "France 2",
+      "multiplex": "R5",
+      "frequency": "586 MHz",
       "multicast": {
-        "ip": "239.255.10.1",
+        "ip": "239.255.5.1",
         "port": 5001,
-        "url": "rtp://@239.255.10.1:5001"
+        "url": "rtp://@239.255.5.1:5001"
       },
       "status": "live",
       "pack": "nouveautes"
     },
     {
-      "id": 516,
-      "name": "CNEWS",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 260,
+      "name": "France 4",
+      "multiplex": "R5",
+      "frequency": "586 MHz",
       "multicast": {
-        "ip": "239.255.10.2",
+        "ip": "239.255.5.2",
         "port": 5001,
-        "url": "rtp://@239.255.10.2:5001"
+        "url": "rtp://@239.255.5.2:5001"
       },
       "status": "live",
       "pack": "nouveautes"
     },
     {
-      "id": 517,
-      "name": "CSTAR",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 262,
+      "name": "franceinfo",
+      "multiplex": "R5",
+      "frequency": "586 MHz",
       "multicast": {
-        "ip": "239.255.10.3",
+        "ip": "239.255.5.3",
         "port": 5001,
-        "url": "rtp://@239.255.10.3:5001"
+        "url": "rtp://@239.255.5.3:5001"
       },
       "status": "live",
       "pack": "nouveautes"
     },
     {
-      "id": 518,
-      "name": "Gulli",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 273,
+      "name": "F3 Paris Ile-de-France",
+      "multiplex": "R5",
+      "frequency": "586 MHz",
       "multicast": {
-        "ip": "239.255.10.4",
+        "ip": "239.255.5.4",
         "port": 5001,
-        "url": "rtp://@239.255.10.4:5001"
-      },
-      "status": "live",
-      "pack": "nouveautes"
-    },
-    {
-      "id": 519,
-      "name": "T18",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
-      "multicast": {
-        "ip": "239.255.10.5",
-        "port": 5001,
-        "url": "rtp://@239.255.10.5:5001"
-      },
-      "status": "live",
-      "pack": "nouveautes"
-    },
-    {
-      "id": 520,
-      "name": "NOVO19",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
-      "multicast": {
-        "ip": "239.255.10.6",
-        "port": 5001,
-        "url": "rtp://@239.255.10.6:5001"
+        "url": "rtp://@239.255.5.4:5001"
       },
       "status": "live",
       "pack": "nouveautes"

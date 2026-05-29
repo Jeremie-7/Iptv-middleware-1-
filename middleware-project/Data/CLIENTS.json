@@ -10,7 +10,9 @@
       "CNEWS",
       "T18",
       "NOVO19",
-      "CSTAR"
+      "CSTAR",
+      "France 2",
+      "France 4"
     ],
     "_note": "mot de passe : stb-01"
   },
@@ -21,8 +23,22 @@
     "packs": [],
     "subscriptions": [
       "BFM TV",
-      "CNEWS"
+      "CNEWS",
+      "Gulli",
+      "RMC STORY",
+      "France 2",
+      "France 4",
+      "franceinfo",
+      "F3 Paris Ile-de-France"
     ],
     "_note": "mot de passe : python-app1"
+  },
+  {
+    "stb_id": "chambre03",
+    "room": "03",
+    "password_hash": "519aec5f5393a152d52dc3bcb2dd87a5e670325af04c1e13d0b48422bb8500ec",
+    "packs": [],
+    "subscriptions": [],
+    "registered_at": "2026-05-29T09:08:40.496Z"
   }
 ]

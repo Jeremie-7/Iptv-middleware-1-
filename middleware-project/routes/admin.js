@@ -58,7 +58,7 @@ setInterval(() => {
 // S'applique à TOUTES les routes sauf /auth/login et /auth/verify
 function requireAdminAuth(req, res, next) {
   // Routes publiques — pas besoin de token
-  const publicRoutes = ["/auth/login", "/auth/verify"];
+  const publicRoutes = ["/auth/login", "/auth/verify", "/packs", "/chaines/sync", "/register", "/login"];
   if (publicRoutes.some(r => req.path.startsWith(r))) return next();
 
   // Lecture du token depuis le header Authorization
