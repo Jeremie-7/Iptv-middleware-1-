@@ -1,23 +1,28 @@
 [
   {
-    "room": "01",
     "stb_id": "stb-01",
+    "room": "01",
+    "password_hash": "55a85ff0587a00ce65a2c653fed5a2a0af4a33b1097dd977f8a19c0b6e17acba",
     "packs": [],
     "subscriptions": [
-      "Arte",
+      "Gulli",
       "BFM TV",
-      "France 2",
-      "franceinfo",
-      "France 4"
-    ]
+      "CNEWS",
+      "T18",
+      "NOVO19",
+      "CSTAR"
+    ],
+    "_note": "mot de passe : stb-01"
   },
   {
-    "room": "02",
     "stb_id": "Pythonapp",
+    "room": "02",
+    "password_hash": "c717ade29831395ae042c58536d723650cd03fa4e6a0ffc5b16a28928f335312",
     "packs": [],
     "subscriptions": [
-      "Arte",
-      "BFM TV"
-    ]
+      "BFM TV",
+      "CNEWS"
+    ],
+    "_note": "mot de passe : python-app1"
   }
 ]

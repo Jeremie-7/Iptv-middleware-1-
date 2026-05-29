@@ -128,7 +128,7 @@ const options = {
   key: fs.readFileSync("./certs/middleware.key"),// cle privée du serveur( a verif)
   cert: fs.readFileSync("./certs/middleware.crt"),// certificat du serveur(a verif)
   ca: fs.readFileSync("./certs/ca.crt"),
-  requestCert: true,  // Demande le certificats
+  requestCert: true,  // Demande le certificats du client (mTLS)
   rejectUnauthorized: false // Ne rejette pas les demandes non-autorisé (si "false" sinon rejette si y'a "true")(pas vérifier avec certificats)
 };
 
@@ -143,6 +143,68 @@ const httpsServer = https.createServer(options, app);
 httpsServer.listen(3000, () => {
   console.log("Middleware IPTV sécurisé (HTTPS + TLS) sur le port 3000");
 });
+
+
+
+//WebSocket est un standard du Web désignant un protocole réseau de la couche application et une interface de programmation du World Wide Web visant à créer des canaux de communication full-duplex par-dessus une connexion TCP pour les navigateurs web.
+//WebSocket is a computer communications protocol, providing a bidirectional communication channel over a single Transmission Control Protocol (TCP) connection
+//The WebSocket API makes it possible to open a two-way interactive communication session between the user's browser and a server. With this API, you can send messages to a server and receive responses without having to poll the server for a reply
+const WebSocket = require('ws');
+
+// Crée le serveur WebSocket sur le même port HTTPS
+const wss = new WebSocket.Server({ server: httpsServer });
+
+// Stocke les clients WebSocket connectés
+const wsClients = new Map(); // stbId → ws
+
+wss.on('connection', (ws, req) => {
+  // Identifie le client via son certificat TLS
+  const cert  = req.socket.getPeerCertificate();
+  const stbId = cert?.subject?.CN || null;
+
+  if (!stbId) {
+    ws.close(1008, 'Certificat requis');
+    return;
+  }
+
+  console.log(`[WS] Connexion : ${stbId}`);
+  wsClients.set(stbId, ws);
+
+  ws.on('close', () => {
+    console.log(`[WS] Déconnexion : ${stbId}`);
+    wsClients.delete(stbId);
+  });
+
+  ws.on('error', () => wsClients.delete(stbId));
+
+  // Envoie un message de bienvenue
+  ws.send(JSON.stringify({ type: 'connected', stbId }));
+});
+
+// Fonction pour notifier un client spécifique
+function notifyClient(stbId, event) {
+  const ws = wsClients.get(stbId);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(event));
+  }
+}
+
+module.exports.notifyClient = notifyClient;
+
+
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route non trouvée' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(`[ERROR] ${err.message}`);
+  res.status(500).json({ error: 'Erreur interne du serveur' });
+});
+
+
 
 
 //WebSocket est un standard du Web désignant un protocole réseau de la couche application et une interface de programmation du World Wide Web visant à créer des canaux de communication full-duplex par-dessus une connexion TCP pour les navigateurs web.
@@ -188,16 +250,3 @@ httpsServer.listen(3000, () => {
 
 //   ws.on("close", () => console.log("[WS] Streamer déconnecté"));
 // });
-
-
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route non trouvée' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(`[ERROR] ${err.message}`);
-  res.status(500).json({ error: 'Erreur interne du serveur' });
-});

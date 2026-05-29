@@ -157,26 +157,47 @@ router.get("/:stbId", (req, res) => {
   }
 });
 
+// ── Authentification duale : certificat TLS OU identifiant/password ──
+// Utilisé par les routes POST pour accepter les deux modes
+// - STB        → req.stbId extrait du certificat TLS
+// - Page web   → { identifiant, password } dans le corps JSON
+function resolveIdentity(req, body) {
+  // Mode 1 : certificat TLS (STB Raspberry Pi)
+  if (req.stbId) return { stbId: req.stbId, error: null };
+
+  // Mode 2 : identifiant + mot de passe (page abonnée web)
+  const { identifiant, password } = body || {};
+  if (!identifiant || !password) {
+    return { stbId: null, error: "Certificat client ou identifiant/mot de passe requis" };
+  }
+
+  const crypto  = require("crypto");
+  const clients = readClients();
+  const client  = clients.find(c => c.stb_id.toLowerCase() === identifiant.toLowerCase());
+
+  if (!client) return { stbId: null, error: "Identifiant ou mot de passe incorrect" };
+  if (!client.password_hash) return { stbId: null, error: "Ce compte utilise uniquement l'authentification par certificat TLS" };
+
+  const hash = crypto.createHash("sha256").update(password + identifiant).digest("hex");
+  if (hash !== client.password_hash) return { stbId: null, error: "Identifiant ou mot de passe incorrect" };
+
+  return { stbId: client.stb_id, error: null };
+}
+
 // ════════════════════════════════════════════════════════════════
 // POST /subscriptions/packs
-// La STB s'abonne ou se désabonne d'un pack.
+// S'abonner / se désabonner d'un pack.
+// Accepte : certificat TLS (STB) OU identifiant+password (page web)
 //
 // Corps JSON :
-//   { "action": "add" | "remove", "packId": "info" }
-//
-// Exemple depuis le Raspberry Pi :
-//   curl -k --cert certs/stb-01.crt --key certs/stb-01.key \
-//     -X POST https://middleware:3000/subscriptions/packs \
-//     -H "Content-Type: application/json" \
-//     -d '{"action":"add","packId":"sport"}'
+//   { "action": "add"|"remove", "packId": "info" }
+//   { "action": "add"|"remove", "packId": "info", "identifiant": "x", "password": "y" }
 // ════════════════════════════════════════════════════════════════
 router.post("/packs", (req, res) => {
   try {
-    const stbId = req.stbId;
-
-    if (!stbId) {
-      return res.status(401).json({ error: "Certificat client requis" });
-    }
+    // Authentification duale
+    const { stbId, error: authError } = resolveIdentity(req, req.body);
+    if (authError) return res.status(401).json({ error: authError });
 
     const { action, packId } = req.body;
 
@@ -191,13 +212,9 @@ router.post("/packs", (req, res) => {
       return res.status(400).json({ error: "action doit être 'add' ou 'remove'" });
     }
 
-    // Vérifie que le pack existe dans CHAINES.json
     const chainesJson = readChaines();
     const packExists  = (chainesJson.packs || []).find(p => p.id === packId);
-
-    if (!packExists) {
-      return res.status(404).json({ error: "Pack inexistant : " + packId });
-    }
+    if (!packExists) return res.status(404).json({ error: "Pack inexistant : " + packId });
 
     // Met à jour CLIENTS.json
     const clients    = readClients();
@@ -250,24 +267,17 @@ router.post("/packs", (req, res) => {
 
 // ════════════════════════════════════════════════════════════════
 // POST /subscriptions/channels
-// La STB ajoute ou retire une chaîne à-la-carte.
+// Ajouter / retirer une chaîne à-la-carte.
+// Accepte : certificat TLS (STB) OU identifiant+password (page web)
 //
 // Corps JSON :
-//   { "action": "add" | "remove", "channelName": "Arte" }
-//
-// Exemple depuis le Raspberry Pi :
-//   curl -k --cert certs/stb-01.crt --key certs/stb-01.key \
-//     -X POST https://middleware:3000/subscriptions/channels \
-//     -H "Content-Type: application/json" \
-//     -d '{"action":"add","channelName":"Arte"}'
+//   { "action": "add"|"remove", "channelName": "Arte" }
+//   { "action": "add"|"remove", "channelName": "Arte", "identifiant": "x", "password": "y" }
 // ════════════════════════════════════════════════════════════════
 router.post("/channels", (req, res) => {
   try {
-    const stbId = req.stbId;
-
-    if (!stbId) {
-      return res.status(401).json({ error: "Certificat client requis" });
-    }
+    const { stbId, error: authError } = resolveIdentity(req, req.body);
+    if (authError) return res.status(401).json({ error: authError });
 
     const { action, channelName } = req.body;
 

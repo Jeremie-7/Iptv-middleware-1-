@@ -24,36 +24,32 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
   background-size:40px 40px}
 
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
-  width:100%;max-width:580px;overflow:hidden;position:relative;z-index:1;
-  box-shadow:0 24px 60px rgba(0,0,0,.4)}
-.card-wide{max-width:780px}
+  width:100%;max-width:600px;overflow:hidden;position:relative;z-index:1;
+  box-shadow:0 24px 60px rgba(0,0,0,.4);transition:max-width .3s}
+.card.wide{max-width:820px}
 
-/* HEADER */
-.card-header{padding:24px 32px 20px;border-bottom:1px solid var(--border);
+.card-header{padding:22px 30px 18px;border-bottom:1px solid var(--border);
   background:linear-gradient(135deg,rgba(79,110,247,.08),rgba(6,182,212,.04));
   display:flex;align-items:center;gap:14px}
-.hicon{width:40px;height:40px;border-radius:10px;background:rgba(79,110,247,.15);
+.hicon{width:38px;height:38px;border-radius:10px;background:rgba(79,110,247,.15);
   border:1px solid rgba(79,110,247,.25);display:flex;align-items:center;
-  justify-content:center;font-size:20px;flex-shrink:0}
+  justify-content:center;font-size:18px;flex-shrink:0}
 .hotel-name{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--accent);margin-bottom:3px}
-.card-title{font-size:18px;font-weight:800;letter-spacing:-.02em}
+.card-title{font-size:17px;font-weight:800}
 
-/* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border)}
-.tab{flex:1;padding:13px;text-align:center;font-size:13px;font-weight:700;
+.tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:700;
   color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
 .tab:hover{color:var(--text);background:rgba(255,255,255,.02)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(79,110,247,.05)}
 
-/* BODY */
-.card-body{padding:24px 32px 28px}
+.card-body{padding:22px 30px 26px}
 .screen{display:none}
 .screen.active{display:block;animation:fadeIn .2s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-/* FORM */
-.form-group{margin-bottom:16px}
+.form-group{margin-bottom:15px}
 .form-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 .form-input{width:100%;background:var(--bg3);border:1px solid var(--border);
@@ -65,45 +61,40 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);
   background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
 
-/* MESSAGES */
 .msg{padding:10px 13px;border-radius:7px;font-family:var(--mono);font-size:11px;
   margin-bottom:14px;display:none;line-height:1.5}
 .msg.ok{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.2);color:var(--green)}
 .msg.err{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--red)}
+.msg.info{background:rgba(79,110,247,.08);border:1px solid rgba(79,110,247,.2);color:var(--accent)}
 
-/* SUBMIT */
 .btn{width:100%;background:var(--accent);color:#fff;border:none;
   font-family:var(--sans);font-size:14px;font-weight:700;padding:12px;
-  border-radius:8px;cursor:pointer;transition:all .15s;margin-top:4px}
+  border-radius:8px;cursor:pointer;transition:all .15s;margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px}
 .btn:hover:not(:disabled){background:#3a5af0;transform:translateY(-1px)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-outline{width:100%;background:transparent;color:var(--muted);
-  border:1px solid var(--border);font-family:var(--sans);font-size:13px;
-  font-weight:600;padding:10px;border-radius:8px;cursor:pointer;transition:all .15s;margin-top:6px}
-.btn-outline:hover{color:var(--text);border-color:var(--bh)}
-.btn-sm{width:auto;padding:7px 16px;font-size:12px;border-radius:6px}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:6px;width:auto}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-outline:hover:not(:disabled){color:var(--text);border-color:var(--bh);background:transparent;transform:none}
 
-/* SPINNER */
-.spin{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;
-  vertical-align:middle;margin-right:6px}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* USER HEADER */
-.user-bar{display:flex;align-items:center;gap:12px;padding:14px 16px;
-  background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:18px}
-.user-av{width:36px;height:36px;border-radius:50%;background:rgba(79,110,247,.2);
-  border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0}
+/* USER BAR */
+.user-bar{display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:16px}
+.user-av{width:34px;height:34px;border-radius:50%;background:rgba(79,110,247,.2);
+  border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px}
 .user-name{font-size:14px;font-weight:800}
 .user-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:1px}
-.user-logout{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red);
+.logout-btn{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red);
   cursor:pointer;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);
-  padding:5px 11px;border-radius:6px;transition:all .15s}
-.user-logout:hover{background:rgba(244,63,94,.15)}
+  padding:5px 10px;border-radius:6px}
+.logout-btn:hover{background:rgba(244,63,94,.15)}
 
 /* STATS */
-.stats{display:flex;gap:8px;margin-bottom:18px}
+.stats{display:flex;gap:8px;margin-bottom:16px}
 .stat{flex:1;background:var(--bg3);border:1px solid var(--border);
   border-radius:8px;padding:10px;text-align:center}
 .stat-v{font-size:20px;font-weight:800;margin-bottom:2px}
@@ -111,53 +102,56 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
   text-transform:uppercase;letter-spacing:.06em}
 
 /* SECTION */
-.section-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+.section-hd{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;margin-top:18px;
   display:flex;align-items:center;gap:8px}
-.section-title span{flex:1;height:0.5px;background:var(--border)}
+.section-hd span{flex:1;height:.5px;background:var(--border)}
+.section-hd:first-child{margin-top:0}
 
-/* PACKS GRID */
-.packs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+/* PACKS */
+.packs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pack-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;
   padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;position:relative}
 .pack-card:hover{border-color:var(--bh)}
-.pack-card.active{border-color:var(--accent);background:rgba(79,110,247,.07)}
-.pack-card.owned{border-color:var(--green);background:rgba(34,211,160,.06)}
+.pack-card.sel{border-color:var(--accent);background:rgba(79,110,247,.07)}
 .pack-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .pack-info{flex:1;min-width:0}
 .pack-name{font-size:12px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pack-meta{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.pack-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);
+.pack-chk{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);
   flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.pack-card.active .pack-check,.pack-card.owned .pack-check{
-  border-color:var(--accent);background:var(--accent)}
-.pack-card.owned .pack-check{border-color:var(--green);background:var(--green)}
-.pack-card.active .pack-check::after,.pack-card.owned .pack-check::after{
-  content:'✓';color:#fff;font-size:9px;font-weight:700}
-.pack-live{position:absolute;top:6px;right:6px;font-family:var(--mono);font-size:9px;
-  color:var(--green);background:rgba(34,211,160,.12);padding:2px 6px;border-radius:3px}
+.pack-card.sel .pack-chk{background:var(--accent);border-color:var(--accent)}
+.pack-card.sel .pack-chk::after{content:'✓';color:#fff;font-size:9px;font-weight:700}
+.pack-live{position:absolute;top:5px;right:6px;font-family:var(--mono);font-size:9px;
+  color:var(--green);background:rgba(34,211,160,.1);padding:2px 5px;border-radius:3px}
 
-/* CHAINES */
-.ch-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.ch-tag{font-family:var(--mono);font-size:10px;padding:4px 9px;
-  border-radius:4px;cursor:pointer;transition:all .15s;
+/* CHAÎNES */
+.ch-grid{display:flex;flex-wrap:wrap;gap:6px}
+.ch-tag{font-family:var(--mono);font-size:10px;padding:4px 9px;border-radius:4px;
+  cursor:pointer;transition:all .15s;
   background:rgba(6,182,212,.07);color:var(--cyan);border:1px solid rgba(6,182,212,.18)}
 .ch-tag:hover{background:rgba(6,182,212,.14)}
-.ch-tag.owned{background:rgba(34,211,160,.1);color:var(--green);border-color:rgba(34,211,160,.25)}
-.ch-tag.in-pack{opacity:.4;cursor:default;text-decoration:line-through}
+.ch-tag.sel{background:rgba(34,211,160,.1);color:var(--green);border-color:rgba(34,211,160,.25)}
+.ch-tag.inpack{opacity:.35;cursor:default;text-decoration:line-through}
 
-/* RÉSUMÉ chaînes */
+/* RÉSUMÉ */
 .ch-summary{background:var(--bg3);border:1px solid var(--border);
-  border-radius:8px;padding:12px 14px;margin-top:12px}
-.ch-summary-title{font-family:var(--mono);font-size:10px;color:var(--muted);
+  border-radius:8px;padding:12px 14px;margin-top:10px}
+.ch-summary-hd{font-family:var(--mono);font-size:10px;color:var(--muted);
   text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 
-hr{border:none;border-top:0.5px solid var(--border);margin:16px 0}
+hr{border:none;border-top:.5px solid var(--border);margin:16px 0}
 
-/* PW STRENGTH */
-.pw-bar-wrap{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:6px}
+/* PW */
+.pw-wrap{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:6px}
 .pw-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
 .pw-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px}
+
+.save-bar{display:none;padding:10px 14px;background:rgba(79,110,247,.08);
+  border:1px solid rgba(79,110,247,.2);border-radius:8px;margin-top:12px;
+  display:none;align-items:center;justify-content:space-between;gap:10px}
+.save-bar.visible{display:flex}
+.save-bar-text{font-family:var(--mono);font-size:11px;color:var(--accent)}
 
 @media(max-width:480px){
   .card-header,.card-body{padding-left:18px;padding-right:18px}
@@ -168,17 +162,14 @@ hr{border:none;border-top:0.5px solid var(--border);margin:16px 0}
 <body>
 
 <div class="card" id="main-card">
-
-  <!-- HEADER -->
   <div class="card-header">
     <div class="hicon">📺</div>
     <div>
       <div class="hotel-name">Hôtel — Service IPTV</div>
-      <div class="card-title" id="header-title">Espace Client</div>
+      <div class="card-title" id="hdr-title">Espace Client</div>
     </div>
   </div>
 
-  <!-- ONGLETS connexion/inscription -->
   <div class="tabs" id="auth-tabs">
     <div class="tab active" onclick="switchTab('login')">Se connecter</div>
     <div class="tab" onclick="switchTab('register')">S'inscrire</div>
@@ -187,126 +178,130 @@ hr{border:none;border-top:0.5px solid var(--border);margin:16px 0}
   <div class="card-body">
 
     <!-- ═══ CONNEXION ═══ -->
-    <div class="screen active" id="screen-login">
+    <div class="screen active" id="sc-login">
       <div class="msg" id="msg-login"></div>
       <div class="form-group">
         <label class="form-label">Identifiant</label>
-        <input class="form-input" type="text" id="login-id" placeholder="Votre identifiant">
+        <input class="form-input" id="l-id" type="text" placeholder="Votre identifiant" autocomplete="username">
       </div>
       <div class="form-group">
         <label class="form-label">Mot de passe</label>
         <div class="input-wrap">
-          <input class="form-input" type="password" id="login-pw" placeholder="Votre mot de passe">
-          <button type="button" class="toggle-pw" onclick="togglePw('login-pw')">👁</button>
+          <input class="form-input" id="l-pw" type="password" placeholder="Votre mot de passe" autocomplete="current-password">
+          <button class="toggle-pw" type="button" onclick="tpw('l-pw')">👁</button>
         </div>
       </div>
-      <button class="btn" onclick="doLogin()">
+      <button class="btn" id="btn-login" onclick="doLogin()">
         <span class="spin" id="sp-login"></span>Se connecter
       </button>
     </div>
 
-    <!-- ═══ INSCRIPTION (étape 1 : infos seulement) ═══ -->
-    <div class="screen" id="screen-register">
+    <!-- ═══ INSCRIPTION ═══ -->
+    <div class="screen" id="sc-register">
       <div class="msg" id="msg-register"></div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)">
-        Créez votre compte · Vous choisirez vos abonnements après.
+        Créez votre compte · Vous choisirez vos abonnements après la connexion.
       </p>
       <div class="form-group">
         <label class="form-label">Identifiant</label>
-        <input class="form-input" type="text" id="reg-id" placeholder="ex: chambre03, jean.dupont...">
+        <input class="form-input" id="r-id" type="text" placeholder="ex: chambre01, jean.dupont...">
       </div>
       <div class="form-group">
         <label class="form-label">Mot de passe</label>
         <div class="input-wrap">
-          <input class="form-input" type="password" id="reg-pw"
-            placeholder="Minimum 6 caractères" oninput="checkStrength(this.value)">
-          <button type="button" class="toggle-pw" onclick="togglePw('reg-pw')">👁</button>
+          <input class="form-input" id="r-pw" type="password"
+            placeholder="Minimum 6 caractères" oninput="checkPw(this.value)">
+          <button class="toggle-pw" type="button" onclick="tpw('r-pw')">👁</button>
         </div>
-        <div class="pw-bar-wrap"><div class="pw-bar" id="pw-bar"></div></div>
+        <div class="pw-wrap"><div class="pw-bar" id="pw-bar"></div></div>
         <div class="pw-hint" id="pw-hint">—</div>
       </div>
       <div class="form-group">
         <label class="form-label">Numéro de chambre</label>
-        <input class="form-input" type="text" id="reg-room" placeholder="ex: 01, 02...">
+        <input class="form-input" id="r-room" type="text" placeholder="ex: 01, 02, 03...">
       </div>
-      <button class="btn" onclick="doRegister()">
+      <button class="btn" id="btn-register" onclick="doRegister()">
         <span class="spin" id="sp-register"></span>Créer mon compte
       </button>
     </div>
 
-    <!-- ═══ ESPACE ABONNÉ (après connexion) ═══ -->
-    <div class="screen" id="screen-dashboard">
+    <!-- ═══ ESPACE ABONNÉ ═══ -->
+    <div class="screen" id="sc-dash">
 
-      <!-- En-tête utilisateur -->
+      <!-- En-tête -->
       <div class="user-bar">
         <div class="user-av">🏠</div>
         <div>
           <div class="user-name" id="d-name">—</div>
           <div class="user-meta">Chambre <span id="d-room">—</span></div>
         </div>
-        <div class="user-logout" onclick="doLogout()">Déconnexion</div>
+        <div class="logout-btn" onclick="doLogout()">Déconnexion</div>
       </div>
 
       <!-- Stats -->
       <div class="stats">
         <div class="stat">
-          <div class="stat-v" id="d-ch-count" style="color:var(--green)">0</div>
+          <div class="stat-v" id="d-nch" style="color:var(--green)">0</div>
           <div class="stat-l">Chaînes</div>
         </div>
         <div class="stat">
-          <div class="stat-v" id="d-pack-count" style="color:var(--accent)">0</div>
+          <div class="stat-v" id="d-npk" style="color:var(--accent)">0</div>
           <div class="stat-l">Packs</div>
         </div>
         <div class="stat">
-          <div class="stat-v" id="d-alacarte-count" style="color:var(--amber)">0</div>
+          <div class="stat-v" id="d-nac" style="color:var(--amber)">0</div>
           <div class="stat-l">À-la-carte</div>
         </div>
         <div class="stat">
-          <div class="stat-v" id="d-live-count" style="color:var(--cyan)">0</div>
-          <div class="stat-l">Diffusées</div>
+          <div class="stat-v" id="d-nlv" style="color:var(--cyan)">0</div>
+          <div class="stat-l">En direct</div>
         </div>
       </div>
 
-      <div class="msg" id="msg-dashboard"></div>
+      <div class="msg" id="msg-dash"></div>
 
-      <!-- PACKS disponibles -->
-      <div class="section-title">Abonnements disponibles <span></span>
-        <span style="font-size:9px;color:var(--green)">● En direct</span>
+      <!-- PACKS -->
+      <div class="section-hd">Abonnements disponibles <span></span>
+        <span style="font-size:9px;color:var(--green)">● Live</span>
       </div>
       <div class="packs-grid" id="d-packs">
         <div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;
           color:var(--muted);text-align:center;padding:14px">Chargement...</div>
       </div>
-      <div id="btn-save-wrap" style="display:none;margin-bottom:14px">
-        <button class="btn" onclick="savePacks()">
-          <span class="spin" id="sp-save"></span>Mettre à jour mes abonnements
+
+      <!-- Barre de sauvegarde packs -->
+      <div class="save-bar" id="save-packs-bar">
+        <span class="save-bar-text">Modifications non sauvegardées</span>
+        <button class="btn btn-sm" onclick="savePacks()">
+          <span class="spin" id="sp-packs"></span>Sauvegarder
         </button>
       </div>
 
       <hr>
 
       <!-- CHAÎNES À-LA-CARTE -->
-      <div class="section-title">Chaînes à-la-carte <span></span>
-        <span style="font-size:9px;color:var(--muted)">(en supplément des packs)</span>
+      <div class="section-hd">Chaînes à-la-carte <span></span>
+        <span style="font-size:9px;color:var(--muted)">en supplément des packs</span>
       </div>
       <div class="ch-grid" id="d-alacarte">
         <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Chargement...</span>
       </div>
-      <div id="btn-save-alacarte-wrap" style="display:none;margin-bottom:14px">
-        <button class="btn" onclick="saveAlaCarte()">
-          <span class="spin" id="sp-alacarte"></span>Mettre à jour les chaînes à-la-carte
+
+      <!-- Barre de sauvegarde à-la-carte -->
+      <div class="save-bar" id="save-ac-bar">
+        <span class="save-bar-text">Modifications non sauvegardées</span>
+        <button class="btn btn-sm" onclick="saveAC()">
+          <span class="spin" id="sp-ac"></span>Sauvegarder
         </button>
       </div>
 
       <hr>
 
-      <!-- RÉSUMÉ chaînes accessibles -->
-      <div class="section-title">Mes chaînes accessibles <span></span></div>
+      <!-- RÉSUMÉ -->
+      <div class="section-hd">Mes chaînes accessibles <span></span></div>
       <div class="ch-summary">
-        <div class="ch-summary-title">
-          <span id="d-ch-label">0</span> chaîne(s) — via packs + à-la-carte
-        </div>
-        <div class="ch-grid" id="d-ch-list">
+        <div class="ch-summary-hd"><span id="d-nch2">0</span> chaîne(s) via packs + à-la-carte</div>
+        <div class="ch-grid" id="d-chlist">
           <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne</span>
         </div>
       </div>
@@ -317,46 +312,41 @@ hr{border:none;border-top:0.5px solid var(--border);margin:16px 0}
 
 <script>
 // ── État ──────────────────────────────────────────────────────
-let session       = null;   // { stbId, room, packs, subscriptions, channels }
-let allPacks      = [];     // packs disponibles sur le serveur
-let allChaines    = [];     // chaînes diffusées par le streamer
-let selectedPacks = [];     // packs sélectionnés dans le dashboard
-let selectedAC    = [];     // à-la-carte sélectionnées
+let S = null;          // session { stbId, room, packs, subscriptions, channels, _pw }
+let allPacks  = [];    // packs du serveur
+let allChains = [];    // chaînes diffusées
+let selPacks  = [];    // packs sélectionnés dans UI
+let selAC     = [];    // à-la-carte sélectionnés dans UI
 
-// ── Tabs auth ────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) =>
-    t.classList.toggle('active', (name==='login'&&i===0)||(name==='register'&&i===1)));
-  showScreen(name==='login' ? 'screen-login' : 'screen-register');
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i)=>
+    el.classList.toggle('active',(t==='login'&&i===0)||(t==='register'&&i===1)));
+  show(t==='login'?'sc-login':'sc-register');
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const isDash = id === 'screen-dashboard';
-  document.getElementById('auth-tabs').style.display = isDash ? 'none' : 'flex';
-  document.getElementById('header-title').textContent =
-    isDash ? 'Mon abonnement' : 'Espace Client';
-  // Agrandit la carte pour le dashboard
-  document.getElementById('main-card').classList.toggle('card-wide', isDash);
+  const dash = id==='sc-dash';
+  document.getElementById('auth-tabs').style.display = dash?'none':'flex';
+  document.getElementById('hdr-title').textContent   = dash?'Mon abonnement':'Espace Client';
+  document.getElementById('main-card').classList.toggle('wide', dash);
 }
 
-// ── Messages ────────────────────────────────────────────────
+// ── Messages ─────────────────────────────────────────────────
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
-  el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
-  setTimeout(() => { if(el.textContent===text) el.style.display='none'; }, 4000);
+  el.textContent=text; el.className='msg '+type; el.style.display='block';
+  if(type!=='err') setTimeout(()=>{if(el.textContent===text)el.style.display='none';},4000);
 }
+function clearMsg(id){ document.getElementById(id).style.display='none'; }
 
-// ── Toggle password ──────────────────────────────────────────
-function togglePw(id) {
-  const i = document.getElementById(id);
-  i.type = i.type === 'password' ? 'text' : 'password';
-}
+// ── Helpers ───────────────────────────────────────────────────
+function tpw(id){ const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; }
 
-// ── Force mot de passe ───────────────────────────────────────
-function checkStrength(v) {
-  let s = 0;
+function checkPw(v) {
+  let s=0;
   if(v.length>=6)s++;if(v.length>=10)s++;
   if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
   const l=[
@@ -368,34 +358,37 @@ function checkStrength(v) {
     {w:'100%',bg:'var(--green)',t:'Très fort ✓'},
   ][Math.min(s,5)];
   const bar=document.getElementById('pw-bar');
-  bar.style.width=l.w;bar.style.background=l.bg;
+  bar.style.width=l.w; bar.style.background=l.bg;
   const hint=document.getElementById('pw-hint');
-  hint.textContent=l.t;hint.style.color=l.bg;
+  hint.textContent=l.t; hint.style.color=l.bg;
 }
 
-// ── Chargement des données serveur ───────────────────────────
+function setLoading(btnId, spId, loading) {
+  document.getElementById(btnId).disabled = loading;
+  document.getElementById(spId).style.display = loading?'block':'none';
+}
+
+// ── Chargement données serveur ────────────────────────────────
 async function loadServerData() {
   try {
-    const [rPacks, rChaines] = await Promise.all([
+    const [rP, rC] = await Promise.all([
       fetch('/admin/packs'),
       fetch('/channels')
     ]);
-    allPacks   = await rPacks.json();
-    const ch   = await rChaines.json();
-    allChaines = Array.isArray(ch) ? ch : (ch.data || []);
-  } catch(e) {
-    console.error('Erreur chargement données:', e);
-  }
+    allPacks  = await rP.json();
+    const ch  = await rC.json();
+    allChains = Array.isArray(ch) ? ch : (ch.data||[]);
+  } catch(e) { console.error('Erreur données serveur:', e); }
 }
 
-// ── CONNEXION ────────────────────────────────────────────────
+// ── CONNEXION ─────────────────────────────────────────────────
 async function doLogin() {
-  const id = document.getElementById('login-id').value.trim();
-  const pw = document.getElementById('login-pw').value;
+  clearMsg('msg-login');
+  const id = document.getElementById('l-id').value.trim();
+  const pw = document.getElementById('l-pw').value;
   if(!id||!pw) return showMsg('msg-login','Identifiant et mot de passe requis','err');
 
-  const sp = document.getElementById('sp-login');
-  sp.style.display='inline-block';
+  setLoading('btn-login','sp-login',true);
   try {
     const r = await fetch('/login', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -403,28 +396,27 @@ async function doLogin() {
     });
     const data = await r.json();
     if(!r.ok) return showMsg('msg-login', data.error||'Identifiant ou mot de passe incorrect','err');
-    session = data;
-    session._pw = pw; // garde pour les mises à jour
+    S = {...data, _pw:pw};
     await loadServerData();
-    openDashboard();
+    openDash();
   } catch(e) {
     showMsg('msg-login','Impossible de contacter le serveur','err');
-  } finally { sp.style.display='none'; }
+  } finally { setLoading('btn-login','sp-login',false); }
 }
 
-// ── INSCRIPTION (infos uniquement, sans packs) ───────────────
+// ── INSCRIPTION ───────────────────────────────────────────────
 async function doRegister() {
-  const id   = document.getElementById('reg-id').value.trim();
-  const pw   = document.getElementById('reg-pw').value;
-  const room = document.getElementById('reg-room').value.trim();
-  if(!id||id.length<3)    return showMsg('msg-register','Identifiant trop court (min 3 caractères)','err');
-  if(!pw||pw.length<6)    return showMsg('msg-register','Mot de passe trop court (min 6 caractères)','err');
-  if(!room)               return showMsg('msg-register','Numéro de chambre requis','err');
+  clearMsg('msg-register');
+  const id   = document.getElementById('r-id').value.trim();
+  const pw   = document.getElementById('r-pw').value;
+  const room = document.getElementById('r-room').value.trim();
 
-  const sp = document.getElementById('sp-register');
-  sp.style.display='inline-block';
+  if(!id||id.length<3)   return showMsg('msg-register','Identifiant trop court (min 3 caractères)','err');
+  if(!pw||pw.length<6)   return showMsg('msg-register','Mot de passe trop court (min 6 caractères)','err');
+  if(!room)              return showMsg('msg-register','Numéro de chambre requis','err');
+
+  setLoading('btn-register','sp-register',true);
   try {
-    // Crée le compte SANS pack — le client les choisira dans le dashboard
     const r = await fetch('/register', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({identifiant:id, password:pw, room, packs:[], packId:''})
@@ -432,228 +424,212 @@ async function doRegister() {
     const data = await r.json();
     if(!r.ok) return showMsg('msg-register', data.error||'Erreur lors de l\'inscription','err');
 
-    showMsg('msg-register','Compte créé ! Connexion en cours...','ok');
-    // Connexion automatique
-    setTimeout(async () => {
-      const r2 = await fetch('/login', {
+    showMsg('msg-register','Compte créé ! Connexion automatique...','ok');
+    setTimeout(async()=>{
+      const r2 = await fetch('/login',{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({identifiant:id, password:pw})
       });
-      if(r2.ok) {
-        session = await r2.json();
-        session._pw = pw;
-        await loadServerData();
-        openDashboard();
-      }
+      if(r2.ok){ S={...await r2.json(), _pw:pw}; await loadServerData(); openDash(); }
     }, 800);
   } catch(e) {
     showMsg('msg-register','Impossible de contacter le serveur','err');
-  } finally { sp.style.display='none'; }
+  } finally { setLoading('btn-register','sp-register',false); }
 }
 
-// ── OUVERTURE DASHBOARD ABONNÉ ────────────────────────────────
-function openDashboard() {
-  document.getElementById('d-name').textContent  = session.stbId || '—';
-  document.getElementById('d-room').textContent  = session.room  || '—';
-  selectedPacks = [...(session.packs||[])];
-  selectedAC    = [...(session.subscriptions||[])];
+// ── DASHBOARD ─────────────────────────────────────────────────
+function openDash() {
+  document.getElementById('d-name').textContent = S.stbId||'—';
+  document.getElementById('d-room').textContent = S.room||'—';
+  selPacks = [...(S.packs||[])];
+  selAC    = [...(S.subscriptions||[])];
   updateStats();
   renderPacks();
-  renderAlaCarte();
-  renderChannelList();
-  showScreen('screen-dashboard');
+  renderAC();
+  renderChList();
+  document.getElementById('save-packs-bar').classList.remove('visible');
+  document.getElementById('save-ac-bar').classList.remove('visible');
+  show('sc-dash');
+  clearMsg('msg-dash');
 }
 
-// ── STATS ────────────────────────────────────────────────────
 function updateStats() {
-  const channels = session.channels || [];
-  const live = channels.filter(ch => allChaines.find(c => c.name===ch.name));
-  document.getElementById('d-ch-count').textContent    = channels.length;
-  document.getElementById('d-pack-count').textContent  = selectedPacks.length;
-  document.getElementById('d-alacarte-count').textContent = selectedAC.length;
-  document.getElementById('d-live-count').textContent  = live.length;
-  document.getElementById('d-ch-label').textContent    = channels.length;
+  const chs  = S.channels||[];
+  const live = chs.filter(ch=>allChains.find(c=>c.name===ch.name)).length;
+  document.getElementById('d-nch').textContent  = chs.length;
+  document.getElementById('d-nch2').textContent = chs.length;
+  document.getElementById('d-npk').textContent  = selPacks.length;
+  document.getElementById('d-nac').textContent  = selAC.length;
+  document.getElementById('d-nlv').textContent  = live;
 }
 
-// ── RENDU PACKS ──────────────────────────────────────────────
+// ── PACKS ─────────────────────────────────────────────────────
 function renderPacks() {
   const grid = document.getElementById('d-packs');
-  if(!allPacks.length) {
+  if(!allPacks.length){
     grid.innerHTML='<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:14px">Aucun pack disponible</div>';
     return;
   }
-
-  grid.innerHTML = allPacks.map(p => {
-    const owned   = selectedPacks.includes(p.id);
-    const col     = p.couleur || '#6b7080';
-    // Nombre de chaînes du pack réellement diffusées
-    const live    = p.chaines.filter(n => allChaines.find(c => c.name===n)).length;
-    const total   = p.chaines.length;
-    return `<div class="pack-card${owned?' owned':''}" data-id="${p.id}" onclick="togglePack('${p.id}',this)">
+  grid.innerHTML = allPacks.map(p=>{
+    const owned = selPacks.includes(p.id);
+    const col   = p.couleur||'#6b7080';
+    const live  = p.chaines.filter(n=>allChains.find(c=>c.name===n)).length;
+    return `<div class="pack-card${owned?' sel':''}" data-id="${p.id}" onclick="togglePack('${p.id}',this)">
       <div class="pack-dot" style="background:${col}"></div>
       <div class="pack-info">
         <div class="pack-name" style="color:${col}">${p.nom}</div>
-        <div class="pack-meta">${total} chaînes · <span style="color:var(--green)">${live} diffusées</span></div>
+        <div class="pack-meta">${p.chaines.length} chaînes · <span style="color:var(--green)">${live} live</span></div>
       </div>
-      <div class="pack-check"></div>
+      <div class="pack-chk"></div>
       ${live>0?'<div class="pack-live">● Live</div>':''}
     </div>`;
   }).join('');
 }
 
 function togglePack(id, el) {
-  if(selectedPacks.includes(id))
-    selectedPacks = selectedPacks.filter(p=>p!==id);
-  else
-    selectedPacks.push(id);
-  el.classList.toggle('owned', selectedPacks.includes(id));
-  el.classList.toggle('active', selectedPacks.includes(id));
-  el.querySelector('.pack-check').classList.toggle('active', selectedPacks.includes(id));
-
-  // Recalcule les chaînes à-la-carte pour marquer celles déjà dans un pack
-  renderAlaCarte();
-
-  // Affiche le bouton sauvegarder si changement
-  const changed = JSON.stringify([...selectedPacks].sort()) !==
-                  JSON.stringify([...(session.packs||[])].sort());
-  document.getElementById('btn-save-wrap').style.display = changed?'block':'none';
+  if(selPacks.includes(id)) selPacks=selPacks.filter(p=>p!==id);
+  else selPacks.push(id);
+  el.classList.toggle('sel', selPacks.includes(id));
+  el.querySelector('.pack-chk').style.cssText = selPacks.includes(id)
+    ? 'background:var(--accent);border-color:var(--accent)'
+    : '';
+  renderAC(); // recalcule les chaînes déjà dans un pack
+  const changed = JSON.stringify([...selPacks].sort()) !== JSON.stringify([...(S.packs||[])].sort());
+  document.getElementById('save-packs-bar').classList.toggle('visible', changed);
 }
 
-// ── RENDU CHAÎNES À-LA-CARTE ─────────────────────────────────
-function renderAlaCarte() {
+// ── À-LA-CARTE ────────────────────────────────────────────────
+function renderAC() {
   const grid = document.getElementById('d-alacarte');
 
-  // Chaînes dans les packs sélectionnés
+  // Chaînes déjà couvertes par les packs sélectionnés
   const inPackNames = new Set();
-  selectedPacks.forEach(pid => {
+  selPacks.forEach(pid=>{
     const p = allPacks.find(x=>x.id===pid);
     if(p) p.chaines.forEach(n=>inPackNames.add(n));
   });
 
-  if(!allChaines.length) {
+  if(!allChains.length){
     grid.innerHTML='<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne diffusée actuellement</span>';
     return;
   }
 
-  grid.innerHTML = allChaines.map(ch => {
-    const inPack  = inPackNames.has(ch.name);
-    const owned   = selectedAC.includes(ch.name);
+  grid.innerHTML = allChains.map(ch=>{
+    const inPack = inPackNames.has(ch.name);
+    const owned  = selAC.includes(ch.name);
     let cls = 'ch-tag';
-    if(inPack)  cls += ' in-pack';
-    else if(owned) cls += ' owned';
-    const title = inPack ? 'Déjà incluse dans un pack' : (owned?'Retirer':'Ajouter à-la-carte');
+    if(inPack)       cls += ' inpack';
+    else if(owned)   cls += ' sel';
+    const title = inPack?'Incluse dans un pack':(owned?'Retirer':'Ajouter');
     return `<div class="${cls}" title="${title}"
       onclick="${inPack?'':'toggleAC(\''+ch.name+'\',this)'}">${ch.name}</div>`;
   }).join('');
 }
 
 function toggleAC(name, el) {
-  if(selectedAC.includes(name))
-    selectedAC = selectedAC.filter(n=>n!==name);
-  else
-    selectedAC.push(name);
-  el.classList.toggle('owned', selectedAC.includes(name));
-
-  const changed = JSON.stringify([...selectedAC].sort()) !==
-                  JSON.stringify([...(session.subscriptions||[])].sort());
-  document.getElementById('btn-save-alacarte-wrap').style.display = changed?'block':'none';
+  if(selAC.includes(name)) selAC=selAC.filter(n=>n!==name);
+  else selAC.push(name);
+  el.classList.toggle('sel', selAC.includes(name));
+  const changed = JSON.stringify([...selAC].sort()) !== JSON.stringify([...(S.subscriptions||[])].sort());
+  document.getElementById('save-ac-bar').classList.toggle('visible', changed);
 }
 
-// ── RÉSUMÉ CHAÎNES ACCESSIBLES ────────────────────────────────
-function renderChannelList() {
-  const channels = session.channels || [];
-  const list = document.getElementById('d-ch-list');
-  if(!channels.length) {
-    list.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne — sélectionnez un abonnement</span>';
+// ── RÉSUMÉ CHAÎNES ────────────────────────────────────────────
+function renderChList() {
+  const chs  = S.channels||[];
+  const list = document.getElementById('d-chlist');
+  if(!chs.length){
+    list.innerHTML='<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">Aucune chaîne — sélectionnez un abonnement</span>';
     return;
   }
-  list.innerHTML = channels.map(ch => {
-    const live = !!allChaines.find(c=>c.name===ch.name);
-    return `<div class="ch-tag${live?' owned':''}" title="${live?'Diffusée en direct':'Non diffusée actuellement'}">${ch.name}${live?' ●':''}</div>`;
+  list.innerHTML = chs.map(ch=>{
+    const live = !!allChains.find(c=>c.name===ch.name);
+    return `<div class="ch-tag${live?' sel':''}" title="${live?'En direct':'Non diffusée'}">${ch.name}${live?' ●':''}</div>`;
   }).join('');
 }
 
-// ── SAUVEGARDE PACKS ─────────────────────────────────────────
+// ── SAUVEGARDE PACKS ──────────────────────────────────────────
 async function savePacks() {
-  const sp = document.getElementById('sp-save');
-  sp.style.display='inline-block';
-  document.querySelector('#btn-save-wrap .btn').disabled=true;
+  setLoading('btn-login','sp-packs',false);
+  document.getElementById('sp-packs').style.display='block';
   try {
-    const before = new Set(session.packs||[]);
-    const after  = new Set(selectedPacks);
-    const toAdd    = selectedPacks.filter(p=>!before.has(p));
+    const before = new Set(S.packs||[]);
+    const after  = new Set(selPacks);
+    const toAdd    = selPacks.filter(p=>!before.has(p));
     const toRemove = [...before].filter(p=>!after.has(p));
 
     for(const packId of toAdd)
-      await fetch('/subscriptions/packs',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'add',packId,identifiant:session.stbId,password:session._pw||''})});
+      await fetch('/subscriptions/packs',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'add',packId,identifiant:S.stbId,password:S._pw})});
+
     for(const packId of toRemove)
-      await fetch('/subscriptions/packs',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'remove',packId,identifiant:session.stbId,password:session._pw||''})});
+      await fetch('/subscriptions/packs',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'remove',packId,identifiant:S.stbId,password:S._pw})});
 
-    // Recharge la session
-    const r = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({identifiant:session.stbId,password:session._pw||''})});
-    if(r.ok){ session={...await r.json(),_pw:session._pw}; }
+    // Recharge la session depuis le serveur
+    const r = await fetch('/login',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({identifiant:S.stbId,password:S._pw})});
+    if(r.ok){ S={...await r.json(),_pw:S._pw}; }
 
-    selectedPacks = [...(session.packs||[])];
-    updateStats(); renderPacks(); renderAlaCarte(); renderChannelList();
-    document.getElementById('btn-save-wrap').style.display='none';
-    showMsg('msg-dashboard','Abonnements mis à jour ✓','ok');
-  } catch(e){ showMsg('msg-dashboard','Erreur lors de la mise à jour','err'); }
-  finally{
-    sp.style.display='none';
-    document.querySelector('#btn-save-wrap .btn').disabled=false;
-  }
+    selPacks = [...(S.packs||[])];
+    updateStats(); renderPacks(); renderAC(); renderChList();
+    document.getElementById('save-packs-bar').classList.remove('visible');
+    showMsg('msg-dash','Abonnements mis à jour ✓','ok');
+  } catch(e){ showMsg('msg-dash','Erreur lors de la mise à jour','err'); }
+  finally{ document.getElementById('sp-packs').style.display='none'; }
 }
 
 // ── SAUVEGARDE À-LA-CARTE ─────────────────────────────────────
-async function saveAlaCarte() {
-  const sp = document.getElementById('sp-alacarte');
-  sp.style.display='inline-block';
+async function saveAC() {
+  document.getElementById('sp-ac').style.display='block';
   try {
-    const before = new Set(session.subscriptions||[]);
-    const after  = new Set(selectedAC);
-    const toAdd    = selectedAC.filter(n=>!before.has(n));
+    const before = new Set(S.subscriptions||[]);
+    const after  = new Set(selAC);
+    const toAdd    = selAC.filter(n=>!before.has(n));
     const toRemove = [...before].filter(n=>!after.has(n));
 
     for(const ch of toAdd)
-      await fetch('/subscriptions/channels',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'add',channelName:ch,identifiant:session.stbId,password:session._pw||''})});
+      await fetch('/subscriptions/channels',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'add',channelName:ch,identifiant:S.stbId,password:S._pw})});
+
     for(const ch of toRemove)
-      await fetch('/subscriptions/channels',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'remove',channelName:ch,identifiant:session.stbId,password:session._pw||''})});
+      await fetch('/subscriptions/channels',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'remove',channelName:ch,identifiant:S.stbId,password:S._pw})});
 
-    const r = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({identifiant:session.stbId,password:session._pw||''})});
-    if(r.ok){ session={...await r.json(),_pw:session._pw}; }
+    const r = await fetch('/login',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({identifiant:S.stbId,password:S._pw})});
+    if(r.ok){ S={...await r.json(),_pw:S._pw}; }
 
-    selectedAC = [...(session.subscriptions||[])];
-    updateStats(); renderAlaCarte(); renderChannelList();
-    document.getElementById('btn-save-alacarte-wrap').style.display='none';
-    showMsg('msg-dashboard','Chaînes à-la-carte mises à jour ✓','ok');
-  } catch(e){ showMsg('msg-dashboard','Erreur','err'); }
-  finally{ sp.style.display='none'; }
+    selAC = [...(S.subscriptions||[])];
+    updateStats(); renderAC(); renderChList();
+    document.getElementById('save-ac-bar').classList.remove('visible');
+    showMsg('msg-dash','Chaînes à-la-carte mises à jour ✓','ok');
+  } catch(e){ showMsg('msg-dash','Erreur','err'); }
+  finally{ document.getElementById('sp-ac').style.display='none'; }
 }
 
-// ── DÉCONNEXION ──────────────────────────────────────────────
+// ── DÉCONNEXION ───────────────────────────────────────────────
 function doLogout() {
-  session=null; selectedPacks=[]; selectedAC=[];
-  document.getElementById('login-id').value='';
-  document.getElementById('login-pw').value='';
-  document.getElementById('btn-save-wrap').style.display='none';
-  document.getElementById('btn-save-alacarte-wrap').style.display='none';
+  S=null; selPacks=[]; selAC=[];
+  document.getElementById('l-id').value='';
+  document.getElementById('l-pw').value='';
   switchTab('login');
 }
 
-// ── INIT ─────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────
 loadServerData();
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', e=>{
   if(e.key!=='Enter') return;
-  const active = document.querySelector('.screen.active');
-  if(!active) return;
-  if(active.id==='screen-login')    doLogin();
-  if(active.id==='screen-register') doRegister();
+  const a=document.querySelector('.screen.active');
+  if(!a) return;
+  if(a.id==='sc-login')    doLogin();
+  if(a.id==='sc-register') doRegister();
 });
 </script>
 </body>
