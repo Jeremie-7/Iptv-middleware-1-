@@ -7,12 +7,13 @@
     "subscriptions": [
       "Gulli",
       "BFM TV",
-      "CNEWS",
       "T18",
       "NOVO19",
       "CSTAR",
-      "France 2",
-      "France 4"
+      "F3 Paris Ile-de-France",
+      "France 4",
+      "franceinfo",
+      "France 2"
     ],
     "_note": "mot de passe : stb-01"
   },
@@ -22,13 +23,11 @@
     "password_hash": "c717ade29831395ae042c58536d723650cd03fa4e6a0ffc5b16a28928f335312",
     "packs": [],
     "subscriptions": [
-      "BFM TV",
       "CNEWS",
       "Gulli",
       "RMC STORY",
-      "France 2",
-      "France 4",
       "franceinfo",
+      "France 4",
       "F3 Paris Ile-de-France"
     ],
     "_note": "mot de passe : python-app1"
