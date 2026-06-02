@@ -1,6 +1,6 @@
 {
   "success": true,
-  "count": 6,
+  "count": 5,
   "multiplexCount": 5,
   "packs": [
     {
@@ -101,21 +101,20 @@
       "description": "Chaînes récemment détectées par le streamer",
       "couleur": "#22d3a0",
       "chaines": [
-        "BFM TV",
-        "CNEWS",
-        "CSTAR",
-        "Gulli",
-        "T18",
-        "NOVO19"
+        "TF1 Séries Films",
+        "RMC LIFE",
+        "L'Equipe",
+        "RMC Découverte",
+        "RMC STORY"
       ]
     }
   ],
   "data": [
     {
-      "id": 515,
-      "name": "BFM TV",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 2561,
+      "name": "TF1 Séries Films",
+      "multiplex": "R6",
+      "frequency": "642 MHz",
       "multicast": {
         "ip": "239.255.10.1",
         "port": 5001,
@@ -125,23 +124,10 @@
       "pack": "nouveautes"
     },
     {
-      "id": 516,
-      "name": "CNEWS",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
-      "multicast": {
-        "ip": "239.255.10.2",
-        "port": 5001,
-        "url": "rtp://@239.255.10.2:5001"
-      },
-      "status": "live",
-      "pack": "nouveautes"
-    },
-    {
-      "id": 517,
-      "name": "CSTAR",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 2563,
+      "name": "RMC LIFE",
+      "multiplex": "R6",
+      "frequency": "642 MHz",
       "multicast": {
         "ip": "239.255.10.3",
         "port": 5001,
@@ -151,10 +137,23 @@
       "pack": "nouveautes"
     },
     {
-      "id": 518,
-      "name": "Gulli",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 2562,
+      "name": "L'Equipe",
+      "multiplex": "R6",
+      "frequency": "642 MHz",
+      "multicast": {
+        "ip": "239.255.10.2",
+        "port": 5001,
+        "url": "rtp://@239.255.10.2:5001"
+      },
+      "status": "live",
+      "pack": "nouveautes"
+    },
+    {
+      "id": 2564,
+      "name": "RMC Découverte",
+      "multiplex": "R6",
+      "frequency": "642 MHz",
       "multicast": {
         "ip": "239.255.10.4",
         "port": 5001,
@@ -164,27 +163,14 @@
       "pack": "nouveautes"
     },
     {
-      "id": 519,
-      "name": "T18",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
+      "id": 2565,
+      "name": "RMC STORY",
+      "multiplex": "R6",
+      "frequency": "642 MHz",
       "multicast": {
         "ip": "239.255.10.5",
         "port": 5001,
         "url": "rtp://@239.255.10.5:5001"
-      },
-      "status": "live",
-      "pack": "nouveautes"
-    },
-    {
-      "id": 520,
-      "name": "NOVO19",
-      "multiplex": "R1",
-      "frequency": "506 MHz",
-      "multicast": {
-        "ip": "239.255.10.6",
-        "port": 5001,
-        "url": "rtp://@239.255.10.6:5001"
       },
       "status": "live",
       "pack": "nouveautes"

@@ -1,0 +1,29 @@
+[
+  {
+    "room": "01",
+    "stb_id": "stb-01",
+    "packs": [],
+    "subscriptions": [
+      "BFM TV",
+      "Gulli",
+      "RMC Découverte",
+      "M6",
+      "France 5",
+      "PARIS PREMIERE",
+      "6ter",
+      "W9"
+    ]
+  },
+  {
+    "room": "02",
+    "stb_id": "Pythonapp",
+    "packs": [],
+    "subscriptions": [
+      "TF1 Séries Films",
+      "M6",
+      "Arte",
+      "Arte.Tv",
+      "W9"
+    ]
+  }
+]
